@@ -1,0 +1,6 @@
+{
+  "tasks": {
+    "test": "deno test --allow-read=. --allow-write=. --allow-net"
+  },
+  "imports": { "@dbushell/xml-streamify": "jsr:@dbushell/xml-streamify@^0.3.0" }
+}

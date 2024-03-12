@@ -1,0 +1,21 @@
+
+## Overall Idea
+
+Make a canvas for browsing dictionary definitions, ability to stick found definitions (or portions of definitions) to the canvas with attributes like date, comments and links leading to other pinned definitions. Create visual tools that would help highlighting added elements by how long ago the definitions appeared on the canvas. 
+
+## Dictionary Module
+
+Built-in dictionary module to browse definitions right in place/
+
+* Format: 
+  * https://globalwordnet.github.io/schemas/
+    * XML file source: 
+      * https://github.com/globalwordnet/english-wordnet
+        * Current release: 2023
+          * `english-wordnet-2023.xml`
+      * XML format: [DTD](https://globalwordnet.github.io/schemas/WN-LMF-1.3.dtd)
+        * Copied over
+          * `WN-LMF-1.3.dtd`
+
+## Canvas Module
+

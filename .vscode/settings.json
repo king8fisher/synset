@@ -1,0 +1,102 @@
+{
+  "deno.enable": true,
+  "deno.lint": true,
+  "deno.cacheOnSave": true,
+  // "deno.enablePaths": ["./"],
+  // "deno.internalInspect": true,
+  "tailwindCSS.experimental.classRegex": [
+    ["cl\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
+  ],
+
+  "editor.codeLens": false, // turn this on for debug test lense
+  "deno.codeLens.test": true,
+
+  // "javascript.preferences.autoImportFileExcludePatterns": [],
+  // "typescript.preferences.autoImportFileExcludePatterns": [],
+  // "javascript.preferences.importModuleSpecifier": "shortest",
+  // "typescript.preferences.importModuleSpecifier": "shortest",
+  // "javascript.preferences.jsxAttributeCompletionStyle": "auto",
+  // "typescript.preferences.jsxAttributeCompletionStyle": "auto",
+  // "javascript.preferences.quoteStyle": "auto",
+  // "typescript.preferences.quoteStyle": "auto",
+  // "javascript.preferences.useAliasesForRenames": true,
+  // "typescript.preferences.useAliasesForRenames": true,
+  "javascript.suggest.autoImports": true,
+  "typescript.suggest.autoImports": true,
+  // "javascript.suggest.classMemberSnippets.enabled": true,
+  // "typescript.suggest.classMemberSnippets.enabled": true,
+  // "javascript.suggest.completeFunctionCalls": false,
+  // "typescript.suggest.completeFunctionCalls": false,
+  // "javascript.suggest.enabled": true,
+  // "typescript.suggest.enabled": true,
+  // "javascript.suggest.includeAutomaticOptionalChainCompletions": true,
+  // "typescript.suggest.includeAutomaticOptionalChainCompletions": true,
+  // "javascript.suggest.includeCompletionsForImportStatements": true,
+  // "typescript.suggest.includeCompletionsForImportStatements": true,
+  // "javascript.suggest.names": true,
+  // "typescript.suggest.objectLiteralMethodSnippets.enabled": true,
+  // "javascript.suggest.paths": true,
+  // "typescript.suggest.paths": true,
+
+  "javascript.updateImportsOnFileMove.enabled": "prompt",
+  "typescript.updateImportsOnFileMove.enabled": "prompt",
+
+  "javascript.inlayHints.enumMemberValues.enabled": true,
+  "typescript.inlayHints.enumMemberValues.enabled": true,
+  "javascript.inlayHints.functionLikeReturnTypes.enabled": true,
+  "typescript.inlayHints.functionLikeReturnTypes.enabled": true,
+  "javascript.inlayHints.parameterNames.enabled": "all",
+  "typescript.inlayHints.parameterNames.enabled": "all",
+  "javascript.inlayHints.parameterNames.suppressWhenArgumentMatchesName": true,
+  "typescript.inlayHints.parameterNames.suppressWhenArgumentMatchesName": true,
+  "javascript.inlayHints.parameterTypes.enabled": true,
+  "typescript.inlayHints.parameterTypes.enabled": true,
+  "javascript.inlayHints.propertyDeclarationTypes.enabled": true,
+  "typescript.inlayHints.propertyDeclarationTypes.enabled": true,
+  "javascript.inlayHints.variableTypes.enabled": true,
+  "typescript.inlayHints.variableTypes.enabled": true,
+  "javascript.inlayHints.variableTypes.suppressWhenTypeMatchesName": true,
+  "typescript.inlayHints.variableTypes.suppressWhenTypeMatchesName": true,
+
+  "editor.inlayHints.enabled": "offUnlessPressed",
+  "editor.inlayHints.padding": false,
+  "editor.inlayHints.fontSize": 11,
+
+  "workbench.colorCustomizations": {
+    "editorInlayHint.background": "#6a6a8739",
+    "editorCodeLens.foreground": "#6a6a87a0"
+  },
+  "javascript.format.enable": false,
+  "typescript.format.enable": false,
+  "editor.defaultFormatter": "denoland.vscode-deno",
+  "editor.formatOnSave": true,
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "denoland.vscode-deno"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "denoland.vscode-deno"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "denoland.vscode-deno"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "denoland.vscode-deno"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "denoland.vscode-deno"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "denoland.vscode-deno"
+  },
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "never",
+    "source.fixAll": "never"
+  },
+  "[css]": {
+    "editor.defaultFormatter": "vscode.css-language-features"
+  },
+  "editor.smoothScrolling": true,
+  "terminal.integrated.smoothScrolling": true,
+  "workbench.list.smoothScrolling": true,
+  "editor.cursorSmoothCaretAnimation": "on"
+}
