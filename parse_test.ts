@@ -1,6 +1,6 @@
 import { assertEquals } from "https://deno.land/std@0.219.0/assert/mod.ts";
 import { existsSync } from "https://deno.land/std@0.219.0/fs/exists.ts";
-import { parse } from "./parse_patched.ts";
+import { parse } from "@dbushell/xml-streamify";
 
 const fileName = "english-wordnet-2023.xml";
 const localFileName = `./data/${fileName}`;

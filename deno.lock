@@ -2,12 +2,11 @@
   "version": "3",
   "packages": {
     "specifiers": {
-      "jsr:@dbushell/xml-streamify": "jsr:@dbushell/xml-streamify@0.3.0",
-      "jsr:@dbushell/xml-streamify@^0.3.0": "jsr:@dbushell/xml-streamify@0.3.0"
+      "jsr:@dbushell/xml-streamify@^0.4.0": "jsr:@dbushell/xml-streamify@0.4.0"
     },
     "jsr": {
-      "@dbushell/xml-streamify@0.3.0": {
-        "integrity": "0a456efe1a0da972f15e436c4c590d9c6f3f546530e9edf53502f1deb0be16ee"
+      "@dbushell/xml-streamify@0.4.0": {
+        "integrity": "78130ecad85f39c6c5bfe92175bad387846e260726307a76d07b024e2689ac53"
       }
     }
   },
@@ -48,7 +47,7 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@dbushell/xml-streamify@^0.3.0"
+      "jsr:@dbushell/xml-streamify@^0.4.0"
     ]
   }
 }
