@@ -71,3 +71,22 @@ format, potentially dumped to a Graph Database
          📄 SynsetRelation
       📄 SyntacticBehaviour
 ```
+
+## Zod Test Coverage
+
+```
+📂 LexicalResource                  [-] (basic test for a parent)
+   📂 Lexicon                       [-] (basic test for a parent)
+      📂 LexicalEntry               [x]
+         📄 Form                    [x]
+         📂 Lemma                   [x]
+            📄 Pronunciation        [x]
+         📂 Sense                   [x]
+            📄 SenseRelation        [x]
+      📂 Synset                     [x]
+         📄 Definition              [x]
+         📄 Example                 [x]
+         📄 ILIDefinition           [x]
+         📄 SynsetRelation          [x]
+      📄 SyntacticBehaviour         [x]
+```
