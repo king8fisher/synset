@@ -161,6 +161,20 @@ export const syntacticBehaviorSchema = z.object({
   subcategorizationFrame: z.string(), // This is where huge variety lives
 });
 
+export const lexiconSchema = z.object({
+  id: idSchema, // "oewn"
+  label: z.string(), // "Open English WordNet"
+  language: z.string(), // "en"
+  email: z.string(), // "english-wordnet@googlegroups.com"
+  license: z.string(), // "https://creativecommons.org/licenses/by/4.0/"
+  version: z.string(), // "2023"
+  citation: z.string(), // "John P. McCrae, Alexandre Rademaker, Francis Bond, Ewa Rudnicka and Christiane Fellbaum (2019) English WordNet 2019 – An Open-Source WordNet for English, *Proceedings of the 10th Global WordNet Conference* – GWC 2019"
+  url: z.string(), // "https://github.com/globalwordnet/english-wordnet">
+  lexicalEntries: z.array(lexicalEntrySchema), // TODO: amount
+  synsets: z.array(synsetSchema), // TODO: amount
+  syntacticBehaviors: z.array(syntacticBehaviorSchema), // TODO: amount
+});
+
 export type Lemma = z.infer<typeof lemmaSchema>;
 export type LexicalEntry = z.infer<typeof lexicalEntrySchema>;
 export type Sense = z.infer<typeof senseSchema>;
@@ -173,3 +187,4 @@ export type Example = z.infer<typeof exampleSchema>;
 export type ILIDefinition = z.infer<typeof iliDefinitionSchema>;
 export type SynsetRelation = z.infer<typeof synsetRelationSchema>;
 export type SyntacticBehavior = z.infer<typeof syntacticBehaviorSchema>;
+export type Lexicon = z.infer<typeof lexiconSchema>;

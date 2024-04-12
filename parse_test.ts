@@ -7,35 +7,21 @@ import {
 import { existsSync } from "$std/fs/exists.ts";
 import { Node, parse } from "@dbushell/xml-streamify";
 import {
-  adjPositionSchema,
-  Definition,
-  definitionSchema,
-  Example,
-  exampleSchema,
-  Form,
-  formSchema,
-  ILIDefinition,
-  iliDefinitionSchema,
-  Lemma,
-  lemmaSchema,
-  LexicalEntry,
-  lexicalEntrySchema,
-  partsOfSpeechList,
-  partsOfSpeechSchema,
-  Pronunciation,
-  pronunciationSchema,
-  Sense,
-  SenseRelation,
-  senseRelationSchema,
-  senseSchema,
-  Synset,
-  synsetIdSchema,
-  SynsetRelation,
-  synsetRelationSchema,
-  synsetSchema,
-  SyntacticBehavior,
-  syntacticBehaviorSchema,
-} from "~/xml_types.ts";
+  DefinitionNode,
+  ExampleNode,
+  FormNode,
+  ILIDefinitionNode,
+  LemmaNode,
+  LexicalEntryNode,
+  LexiconNode,
+  PronunciationNode,
+  SenseNode,
+  SenseRelationNode,
+  SynsetNode,
+  SynsetRelationNode,
+  SyntacticBehaviorNode,
+} from "~/parse_node_helpers.ts";
+import { Lexicon, partsOfSpeechList } from "~/xml_types.ts";
 
 const version = "2023";
 const fileName = `english-wordnet-${version}.xml`;
@@ -143,134 +129,25 @@ function assertNodeParentType(node: Node, type: string) {
   );
 }
 
-function PronunciationNode(node: Node): Pronunciation {
-  const obj = Object.assign({}, {
-    variety: node.attributes["variety"],
-    inner: node.innerText,
-  });
-  return pronunciationSchema.parse(obj);
-}
-
-function LemmaNode(node: Node): Lemma {
-  const obj = Object.assign({}, {
-    writtenForm: node.attributes["writtenForm"],
-    partOfSpeech: partsOfSpeechSchema.parse(node.attributes["partOfSpeech"]),
-    pronunciations: node.children.filter((v) => v.type == "Pronunciation").map(
-      (v) => {
-        return PronunciationNode(v);
-      },
-    ),
-  });
-  return lemmaSchema.parse(obj);
-}
-
-function SenseRelationNode(node: Node): SenseRelation {
-  return senseRelationSchema.parse({
-    relType: node.attributes["relType"],
-    target: node.attributes["target"],
-    dcType: node.attributes["dc:type"],
-  });
-}
-
-function SenseNode(node: Node): Sense {
-  const obj: Sense = {
-    id: node.attributes["id"],
-    synset: synsetIdSchema.parse(node.attributes["synset"]),
-    senseRelations: node.children.filter((v) => v.type == "SenseRelation").map(
-      (v) => {
-        return SenseRelationNode(v);
-      },
-    ),
-    subCat: node.attributes["subcat"],
-    adjPosition: node.attributes["adjposition"]
-      ? adjPositionSchema.parse(node.attributes["adjposition"])
-      : undefined,
-  };
-  return senseSchema.parse(obj);
-}
-
-function FormNode(node: Node): Form {
-  return formSchema.parse(
-    { writtenForm: node.attributes["writtenForm"] },
+Deno.test("Lexicon node parse", async () => {
+  const start = performance.now();
+  const parser = await testFileParser();
+  let lexicon: Lexicon | null = null;
+  for await (const node of parser) {
+    if (node.type == "Lexicon") {
+      console.log(node.children.length);
+      lexicon = LexiconNode(node);
+    }
+  }
+  assert(lexicon != undefined);
+  console.log(
+    `${((performance.now() - start) / 1000).toFixed(2)}s`,
+    lexicon.email,
   );
-}
-
-function LexicalEntryNode(node: Node): LexicalEntry {
-  const obj: LexicalEntry = {
-    id: node.attributes["id"],
-    lemmas: node.children.filter((v) => v.type == "Lemma").map((v) => {
-      return LemmaNode(v);
-    }),
-    senses: node.children.filter((v) => v.type == "Sense").map((v) => {
-      return SenseNode(v);
-    }),
-    forms: node.children.filter((v) => v.type == "Form").map((v) => {
-      return FormNode(v);
-    }),
-  };
-  return lexicalEntrySchema.parse(obj);
-}
-
-function DefinitionNode(node: Node): Definition {
-  const obj = {
-    inner: node.innerText,
-  };
-  return definitionSchema.parse(obj);
-}
-
-function ExampleNode(node: Node): Example {
-  const obj = {
-    inner: node.innerText,
-  };
-  return exampleSchema.parse(obj);
-}
-
-function ILIDefinitionNode(node: Node): ILIDefinition {
-  const obj = {
-    inner: node.innerText,
-  };
-  return iliDefinitionSchema.parse(obj);
-}
-
-function SynsetRelationNode(node: Node): SynsetRelation {
-  const obj = {
-    relType: node.attributes["relType"],
-    target: node.attributes["target"],
-  };
-  return synsetRelationSchema.parse(obj);
-}
-
-function SyntacticBehaviourNode(node: Node): SyntacticBehavior {
-  const obj: SyntacticBehavior = {
-    id: node.attributes["id"],
-    subcategorizationFrame: node.attributes["subcategorizationFrame"],
-  };
-  return syntacticBehaviorSchema.parse(obj);
-}
-
-function SynsetNode(node: Node): Synset {
-  const obj: Synset = {
-    id: node.attributes["id"],
-    ili: node.attributes["ili"],
-    lexfile: node.attributes["lexfile"],
-    members: node.attributes["members"],
-    partOfSpeech: partsOfSpeechSchema.parse(node.attributes["partOfSpeech"]),
-    definitions: node.children.filter((v) => v.type == "Definition").map(
-      (v) => DefinitionNode(v),
-    ),
-    examples: node.children.filter((v) => v.type == "Example").map(
-      (v) => ExampleNode(v),
-    ),
-    iliDefinitions: node.children.filter((v) => v.type == "ILIDefinition").map(
-      (v) => ILIDefinitionNode(v),
-    ),
-    synsetRelations: node.children.filter((v) => v.type == "SynsetRelation")
-      .map(
-        (v) => SynsetRelationNode(v),
-      ),
-  };
-  return synsetSchema.parse(obj);
-}
+  lexicon.lexicalEntries.forEach((v) => {
+    console.log(v.lemmas);
+  });
+});
 
 Deno.test("valid xml data", async () => {
   const start = performance.now();
@@ -303,6 +180,7 @@ Deno.test("valid xml data", async () => {
       case "Lexicon": {
         lexicons++;
         assertNodeParentType(node, "LexicalResource");
+        const _ = LexiconNode(node);
         break;
       }
       case "LexicalEntry": {
@@ -405,7 +283,7 @@ Deno.test("valid xml data", async () => {
       }
       case "SyntacticBehaviour": {
         assertNodeParentType(node, "Lexicon");
-        const _ = SyntacticBehaviourNode(node);
+        const _ = SyntacticBehaviorNode(node);
         break;
       }
       case "declaration": {
