@@ -144,9 +144,6 @@ Deno.test("Lexicon node parse", async () => {
     `${((performance.now() - start) / 1000).toFixed(2)}s`,
     lexicon.email,
   );
-  lexicon.lexicalEntries.forEach((v) => {
-    console.log(v.lemmas);
-  });
 });
 
 Deno.test("valid xml data", async () => {
