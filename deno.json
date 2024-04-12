@@ -2,5 +2,9 @@
   "tasks": {
     "test": "deno test --allow-read=. --allow-write=. --allow-net"
   },
-  "imports": { "@dbushell/xml-streamify": "jsr:@dbushell/xml-streamify@^0.4.0" }
+  "imports": {
+    "~/": "./",
+    "$std/": "https://deno.land/std@0.221.0/",
+    "@dbushell/xml-streamify": "jsr:@dbushell/xml-streamify@^0.4.0"
+  }
 }
