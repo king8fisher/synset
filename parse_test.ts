@@ -144,6 +144,12 @@ Deno.test("Lexicon node parse", async () => {
     `${((performance.now() - start) / 1000).toFixed(2)}s`,
     lexicon.email,
   );
+  assertEquals(lexicon.version, version);
+  // lexicon.lexicalEntries.forEach((e) => {
+  //   e.lemmas.forEach((l) => {
+  //     Deno.stdout.writeSync(new TextEncoder().encode(l.writtenForm + " "));
+  //   });
+  // });
 });
 
 Deno.test("valid xml data", async () => {
@@ -177,7 +183,7 @@ Deno.test("valid xml data", async () => {
       case "Lexicon": {
         lexicons++;
         assertNodeParentType(node, "LexicalResource");
-        const _ = LexiconNode(node);
+        // const _ = LexiconNode(node);
         break;
       }
       case "LexicalEntry": {

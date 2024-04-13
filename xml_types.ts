@@ -87,19 +87,19 @@ export const partsOfSpeechList: string[] = partsOfSpeechSchema.options.map((
 
 export const pronunciationSchema = z.object({
   variety: z.string().optional(), // TODO: "GB", "US", ...
-  inner: z.string(), // That's the actual pronunciation value
+  inner: z.string(), // Actual value
 });
 
 export const lemmaSchema = z.object({
-  writtenForm: z.string(), // This is where huge variety lives
+  writtenForm: z.string(), // Actual value
   partOfSpeech: partsOfSpeechSchema,
-  pronunciations: z.array(pronunciationSchema), // TODO: amounts
+  pronunciations: z.array(pronunciationSchema).min(0),
 });
 
 export const senseRelationSchema = z.object({
   relType: senseRelationRelType,
   dcType: z.string().optional(), // TODO: This is only when relType is "other"
-  target: z.string(), // TODO
+  target: z.string(), // TODO Where this leads to
 });
 
 export const adjPositionSchema = z.union([
@@ -113,7 +113,7 @@ export const senseSchema = z.object({
   synset: synsetIdSchema,
   subCat: syntacticBehaviorIdSchema.optional(),
   adjPosition: adjPositionSchema.optional(),
-  senseRelations: z.array(senseRelationSchema), // TODO amounts
+  senseRelations: z.array(senseRelationSchema).min(0),
 });
 
 export const formSchema = z.object({
@@ -122,26 +122,26 @@ export const formSchema = z.object({
 
 export const lexicalEntrySchema = z.object({
   id: idSchema,
-  lemmas: z.array(lemmaSchema), // TODO amounts
-  senses: z.array(senseSchema), // TODO amounts
-  forms: z.array(formSchema), // TODO amounts
+  lemmas: z.array(lemmaSchema).length(1),
+  senses: z.array(senseSchema).min(1),
+  forms: z.array(formSchema).min(0),
 });
 
 export const definitionSchema = z.object({
-  inner: z.string(), // That's the actual pronunciation value
+  inner: z.string(), // Actual value
 });
 
 export const exampleSchema = z.object({
-  inner: z.string(), // That's the actual pronunciation value
+  inner: z.string(), // Actual value
 });
 
 export const iliDefinitionSchema = z.object({
-  inner: z.string(), // That's the actual pronunciation value
+  inner: z.string(), // Actual value
 });
 
 export const synsetRelationSchema = z.object({
   relType: synsetRelationRelType,
-  target: z.string(), // TODO
+  target: z.string(), // TODO Where this leads to?
 });
 
 export const synsetSchema = z.object({
@@ -150,10 +150,10 @@ export const synsetSchema = z.object({
   members: z.string(), // space-separated list
   partOfSpeech: partsOfSpeechSchema,
   lexfile: z.string(),
-  definitions: z.array(definitionSchema), // TODO amounts. Only one?
-  examples: z.array(exampleSchema), // TODO amounts. Many?
-  iliDefinitions: z.array(iliDefinitionSchema), // TODO amounts. Only one?
-  synsetRelations: z.array(synsetRelationSchema), // TODO amounts. Many?
+  definitions: z.array(definitionSchema).min(1),
+  examples: z.array(exampleSchema).min(0),
+  iliDefinitions: z.array(iliDefinitionSchema).min(0),
+  synsetRelations: z.array(synsetRelationSchema).min(0),
 });
 
 export const syntacticBehaviorSchema = z.object({
@@ -170,9 +170,9 @@ export const lexiconSchema = z.object({
   version: z.string(), // "2023"
   citation: z.string(), // "John P. McCrae, Alexandre Rademaker, Francis Bond, Ewa Rudnicka and Christiane Fellbaum (2019) English WordNet 2019 – An Open-Source WordNet for English, *Proceedings of the 10th Global WordNet Conference* – GWC 2019"
   url: z.string(), // "https://github.com/globalwordnet/english-wordnet">
-  lexicalEntries: z.array(lexicalEntrySchema), // TODO: amount
-  synsets: z.array(synsetSchema), // TODO: amount
-  syntacticBehaviors: z.array(syntacticBehaviorSchema), // TODO: amount
+  lexicalEntries: z.array(lexicalEntrySchema).min(0),
+  synsets: z.array(synsetSchema).min(0),
+  syntacticBehaviors: z.array(syntacticBehaviorSchema).min(0),
 });
 
 export type Lemma = z.infer<typeof lemmaSchema>;

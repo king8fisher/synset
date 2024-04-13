@@ -35,7 +35,7 @@ import {
 
 export function PronunciationNode(node: Node): Pronunciation {
   const obj: Pronunciation = {
-    variety: node.attributes["variety"],
+    variety: attr(node, "variety"),
     inner: node.innerText,
   };
   return pronunciationSchema.parse(obj);
@@ -43,22 +43,18 @@ export function PronunciationNode(node: Node): Pronunciation {
 
 export function LemmaNode(node: Node): Lemma {
   const obj: Lemma = {
-    writtenForm: node.attributes["writtenForm"],
-    partOfSpeech: partsOfSpeechSchema.parse(node.attributes["partOfSpeech"]),
-    pronunciations: node.children.filter((v) => v.type == "Pronunciation")
-      .map(
-        (v) => {
-          return PronunciationNode(v);
-        },
-      ),
+    writtenForm: attr(node, "writtenForm"),
+    partOfSpeech: partsOfSpeechSchema.parse(attr(node, "partOfSpeech")),
+    pronunciations: //
+      children(node, "Pronunciation", (v) => PronunciationNode(v)),
   };
   return lemmaSchema.parse(obj);
 }
 
 export function SenseRelationNode(node: Node): SenseRelation {
   const obj: SenseRelation = {
-    relType: senseRelationRelType.parse(node.attributes["relType"]),
-    target: node.attributes["target"],
+    relType: senseRelationRelType.parse(attr(node, "relType")),
+    target: attr(node, "target"),
     dcType: node.attributes["dc:type"],
   };
   return senseRelationSchema.parse(obj);
@@ -66,16 +62,12 @@ export function SenseRelationNode(node: Node): SenseRelation {
 
 export function SenseNode(node: Node): Sense {
   const obj: Sense = {
-    id: node.attributes["id"],
-    synset: synsetIdSchema.parse(node.attributes["synset"]),
-    senseRelations: node.children.filter((v) => v.type == "SenseRelation").map(
-      (v) => {
-        return SenseRelationNode(v);
-      },
-    ),
-    subCat: node.attributes["subcat"],
-    adjPosition: node.attributes["adjposition"]
-      ? adjPositionSchema.parse(node.attributes["adjposition"])
+    id: attr(node, "id"),
+    synset: synsetIdSchema.parse(attr(node, "synset")),
+    senseRelations: children(node, "SenseRelation", SenseRelationNode),
+    subCat: attr(node, "subcat"),
+    adjPosition: attr(node, "adjposition")
+      ? adjPositionSchema.parse(attr(node, "adjposition"))
       : undefined,
   };
   return senseSchema.parse(obj);
@@ -83,23 +75,17 @@ export function SenseNode(node: Node): Sense {
 
 export function FormNode(node: Node): Form {
   const obj: Form = {
-    writtenForm: node.attributes["writtenForm"],
+    writtenForm: attr(node, "writtenForm"),
   };
   return formSchema.parse(obj);
 }
 
 export function LexicalEntryNode(node: Node): LexicalEntry {
   const obj: LexicalEntry = {
-    id: node.attributes["id"],
-    lemmas: node.children.filter((v) => v.type == "Lemma").map((v) => {
-      return LemmaNode(v);
-    }),
-    senses: node.children.filter((v) => v.type == "Sense").map((v) => {
-      return SenseNode(v);
-    }),
-    forms: node.children.filter((v) => v.type == "Form").map((v) => {
-      return FormNode(v);
-    }),
+    id: attr(node, "id"),
+    lemmas: children(node, "Lemma", LemmaNode),
+    senses: children(node, "Sense", SenseNode),
+    forms: children(node, "Form", FormNode),
   };
   return lexicalEntrySchema.parse(obj);
 }
@@ -127,65 +113,62 @@ export function ILIDefinitionNode(node: Node): ILIDefinition {
 
 export function SynsetRelationNode(node: Node): SynsetRelation {
   const obj: SynsetRelation = {
-    relType: synsetRelationRelType.parse(node.attributes["relType"]),
-    target: node.attributes["target"],
+    relType: synsetRelationRelType.parse(attr(node, "relType")),
+    target: attr(node, "target"),
   };
   return synsetRelationSchema.parse(obj);
 }
 
 export function SyntacticBehaviorNode(node: Node): SyntacticBehavior {
   const obj: SyntacticBehavior = {
-    id: node.attributes["id"],
-    subcategorizationFrame: node.attributes["subcategorizationFrame"],
+    id: attr(node, "id"),
+    subcategorizationFrame: attr(node, "subcategorizationFrame"),
   };
   return syntacticBehaviorSchema.parse(obj);
 }
 
 export function SynsetNode(node: Node): Synset {
   const obj: Synset = {
-    id: node.attributes["id"],
-    ili: node.attributes["ili"],
-    lexfile: node.attributes["lexfile"],
-    members: node.attributes["members"],
-    partOfSpeech: partsOfSpeechSchema.parse(node.attributes["partOfSpeech"]),
-    definitions: node.children.filter((v) => v.type == "Definition").map(
-      (v) => DefinitionNode(v),
-    ),
-    examples: node.children.filter((v) => v.type == "Example").map(
-      (v) => ExampleNode(v),
-    ),
-    iliDefinitions: node.children.filter((v) => v.type == "ILIDefinition").map(
-      (v) => ILIDefinitionNode(v),
-    ),
-    synsetRelations: node.children.filter((v) => v.type == "SynsetRelation")
-      .map(
-        (v) => SynsetRelationNode(v),
-      ),
+    id: attr(node, "id"),
+    ili: attr(node, "ili"),
+    lexfile: attr(node, "lexfile"),
+    members: attr(node, "members"),
+    partOfSpeech: partsOfSpeechSchema.parse(attr(node, "partOfSpeech")),
+    definitions: children(node, "Definition", (v) => DefinitionNode(v)),
+    examples: children(node, "Example", (v) => ExampleNode(v)),
+    iliDefinitions: children(node, "ILIDefinition", ILIDefinitionNode),
+    synsetRelations: children(node, "SynsetRelation", SynsetRelationNode),
   };
   return synsetSchema.parse(obj);
 }
 
 export function LexiconNode(node: Node): Lexicon {
   const obj: Lexicon = {
-    id: node.attributes["id"],
-    label: node.attributes["label"],
-    language: node.attributes["language"],
-    email: node.attributes["email"],
-    license: node.attributes["license"],
-    version: node.attributes["version"],
-    citation: node.attributes["citation"],
-    url: node.attributes["url"],
-    lexicalEntries: node.children.filter((v) => v.type == "LexicalEntry").map(
-      (v) => LexicalEntryNode(v),
-    ),
-    synsets: node.children.filter((v) => v.type == "Synset").map(
-      (v) => SynsetNode(v),
-    ),
-    syntacticBehaviors: node.children.filter((v) =>
-      v.type == "SyntacticBehaviour"
-    ).map(
-      (v) => SyntacticBehaviorNode(v),
-    ),
+    id: attr(node, "id"),
+    label: attr(node, "label"),
+    language: attr(node, "language"),
+    email: attr(node, "email"),
+    license: attr(node, "license"),
+    version: attr(node, "version"),
+    citation: attr(node, "citation"),
+    url: attr(node, "url"),
+    lexicalEntries: children(node, "LexicalEntry", LexicalEntryNode),
+    synsets: children(node, "Synset", SynsetNode),
+    syntacticBehaviors: //
+      children(node, "SyntacticBehaviour", SyntacticBehaviorNode),
   };
   return lexiconSchema.parse(obj);
 }
+
+const attr = (node: Node, attrName: string) => {
+  return node.attributes[attrName];
+};
+
+const children = <T, Fn extends (node: Node) => T>(
+  node: Node,
+  type: string,
+  fn: Fn,
+) => {
+  return node.children.filter((v) => v.type == type)
+    .map((v) => fn(v));
+};
