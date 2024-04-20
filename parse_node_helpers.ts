@@ -25,7 +25,7 @@ export function PronunciationNode(node: Node): Pronunciation {
     variety: attr(node, "variety"),
     inner: node.innerText,
   };
-  return Pronunciation.parse(obj);
+  return Pronunciation.parse(extendWithRestAttr(node, obj, (s) => s));
 }
 
 export function LemmaNode(node: Node): Lemma {
@@ -35,16 +35,18 @@ export function LemmaNode(node: Node): Lemma {
     pronunciations: //
       children(node, "Pronunciation", (v) => PronunciationNode(v)),
   };
-  return Lemma.parse(obj);
+  return Lemma.parse(extendWithRestAttr(node, obj, (s) => s));
 }
 
 export function SenseRelationNode(node: Node): SenseRelation {
   const obj: SenseRelation = {
     relType: SenseRelationRelType.parse(attr(node, "relType")),
     target: attr(node, "target"),
-    dcType: node.attributes["dc:type"],
+    dcType: attr(node, "dc:type"),
   };
-  return SenseRelation.parse(obj);
+  return SenseRelation.parse(
+    extendWithRestAttr(node, obj, (s) => s == "dc:type" ? "dcType" : s),
+  );
 }
 
 export function SenseNode(node: Node): Sense {
@@ -57,14 +59,20 @@ export function SenseNode(node: Node): Sense {
       ? AdjPosition.parse(attr(node, "adjposition"))
       : undefined,
   };
-  return Sense.parse(obj);
+  return Sense.parse(
+    extendWithRestAttr(
+      node,
+      obj,
+      (s) => s == "subcat" ? "subCat" : s == "adjposition" ? "adjPosition" : s,
+    ),
+  );
 }
 
 export function FormNode(node: Node): Form {
   const obj: Form = {
     writtenForm: attr(node, "writtenForm"),
   };
-  return Form.parse(obj);
+  return Form.parse(extendWithRestAttr(node, obj, (s) => s));
 }
 
 export function LexicalEntryNode(node: Node): LexicalEntry {
@@ -74,28 +82,31 @@ export function LexicalEntryNode(node: Node): LexicalEntry {
     senses: children(node, "Sense", SenseNode),
     forms: children(node, "Form", FormNode),
   };
-  return LexicalEntry.parse(obj);
+  return LexicalEntry.parse(extendWithRestAttr(node, obj, (s) => s));
 }
 
 export function DefinitionNode(node: Node): Definition {
   const obj: Definition = {
     inner: node.innerText,
   };
-  return Definition.parse(obj);
+  return Definition.parse(extendWithRestAttr(node, obj, (s) => s));
 }
 
 export function ExampleNode(node: Node): Example {
   const obj: Example = {
     inner: node.innerText,
+    dcSource: attr(node, "dc:source"),
   };
-  return Example.parse(obj);
+  return Example.parse(
+    extendWithRestAttr(node, obj, (s) => s == "dc:source" ? "dcSource" : s),
+  );
 }
 
 export function ILIDefinitionNode(node: Node): ILIDefinition {
   const obj: ILIDefinition = {
     inner: node.innerText,
   };
-  return ILIDefinition.parse(obj);
+  return ILIDefinition.parse(extendWithRestAttr(node, obj, (s) => s));
 }
 
 export function SynsetRelationNode(node: Node): SynsetRelation {
@@ -103,7 +114,7 @@ export function SynsetRelationNode(node: Node): SynsetRelation {
     relType: SynsetRelationRelType.parse(attr(node, "relType")),
     target: attr(node, "target"),
   };
-  return SynsetRelation.parse(obj);
+  return SynsetRelation.parse(extendWithRestAttr(node, obj, (s) => s));
 }
 
 export function SyntacticBehaviorNode(node: Node): SyntacticBehavior {
@@ -111,7 +122,7 @@ export function SyntacticBehaviorNode(node: Node): SyntacticBehavior {
     id: attr(node, "id"),
     subcategorizationFrame: attr(node, "subcategorizationFrame"),
   };
-  return SyntacticBehavior.parse(obj);
+  return SyntacticBehavior.parse(extendWithRestAttr(node, obj, (s) => s));
 }
 
 export function SynsetNode(node: Node): Synset {
@@ -120,13 +131,16 @@ export function SynsetNode(node: Node): Synset {
     ili: attr(node, "ili"),
     lexfile: attr(node, "lexfile"),
     members: attr(node, "members"),
+    dcSource: attr(node, "dc:source"),
     partOfSpeech: PartsOfSpeech.parse(attr(node, "partOfSpeech")),
     definitions: children(node, "Definition", (v) => DefinitionNode(v)),
     examples: children(node, "Example", (v) => ExampleNode(v)),
     iliDefinitions: children(node, "ILIDefinition", ILIDefinitionNode),
     synsetRelations: children(node, "SynsetRelation", SynsetRelationNode),
   };
-  return Synset.parse(obj);
+  return Synset.parse(
+    extendWithRestAttr(node, obj, (s) => s == "dc:source" ? "dcSource" : s),
+  );
 }
 
 /** LexiconNode is used as a root node for the whole WordNet document structure,
@@ -147,11 +161,38 @@ export function LexiconNode(node: Node): Lexicon {
     syntacticBehaviors: //
       children(node, "SyntacticBehaviour", SyntacticBehaviorNode),
   };
-  return Lexicon.parse(obj);
+  return Lexicon.parse(extendWithRestAttr(node, obj, (s) => s));
 }
 
 const attr = (node: Node, attrName: string) => {
   return node.attributes[attrName];
+};
+
+/** restAttrs appends the rest of the attributes, taking into account that some has been renamed.
+ * The proxy function provided is expected to return the renamed result for an original xml key.
+ */
+const restAttrs = (
+  node: Node,
+  obj: object,
+  proxy: (from: string) => string,
+): Record<string, string> => {
+  const result: Record<string, string> = {};
+  Object.keys(node.attributes) // These keys are still unmodified
+    .filter((a) => !(proxy(a) in obj)) // Here we can't trust the 'in' because obj already has modified keys.
+    .forEach(
+      (k) => {
+        result[k] = node.attributes[k];
+      },
+    );
+  return result;
+};
+
+const extendWithRestAttr = (
+  node: Node,
+  obj: object,
+  proxy: (from: string) => string,
+) => {
+  return Object.assign(obj, restAttrs(node, obj, proxy));
 };
 
 const children = <T, Fn extends (node: Node) => T>(

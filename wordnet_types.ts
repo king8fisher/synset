@@ -84,19 +84,19 @@ export const SynsetRelationRelType = z.union([
 export const Pronunciation = z.object({
   variety: z.string().optional(), // TODO: "GB", "US", ...
   inner: z.string(), // Actual value
-});
+}).strict();
 
 export const Lemma = z.object({
   writtenForm: z.string(), // Actual value
   partOfSpeech: PartsOfSpeech,
   pronunciations: z.array(Pronunciation).min(0),
-});
+}).strict();
 
 export const SenseRelation = z.object({
   relType: SenseRelationRelType,
   dcType: z.string().optional(), // TODO: This is only when relType is "other"
   target: z.string(), // TODO Where this leads to
-});
+}).strict();
 
 export const AdjPosition = z.union([
   z.literal("a"),
@@ -110,35 +110,36 @@ export const Sense = z.object({
   subCat: SyntacticBehaviorId.optional(),
   adjPosition: AdjPosition.optional(),
   senseRelations: z.array(SenseRelation).min(0),
-});
+}).strict();
 
 export const Form = z.object({
   writtenForm: z.string(), // This is where huge variety lives
-});
+}).strict();
 
 export const LexicalEntry = z.object({
   id: Id,
   lemmas: z.array(Lemma).length(1),
   senses: z.array(Sense).min(1),
   forms: z.array(Form).min(0),
-});
+}).strict();
 
 export const Definition = z.object({
   inner: z.string(), // Actual value
-});
+}).strict();
 
 export const Example = z.object({
   inner: z.string(), // Actual value
-});
+  dcSource: z.string().optional(),
+}).strict();
 
 export const ILIDefinition = z.object({
   inner: z.string(), // Actual value
-});
+}).strict();
 
 export const SynsetRelation = z.object({
   relType: SynsetRelationRelType,
   target: z.string(), // TODO Where this leads to?
-});
+}).strict();
 
 export const Synset = z.object({
   id: Id,
@@ -146,16 +147,17 @@ export const Synset = z.object({
   members: z.string(), // space-separated list
   partOfSpeech: PartsOfSpeech,
   lexfile: z.string(),
+  dcSource: z.string().optional(),
   definitions: z.array(Definition).min(1),
   examples: z.array(Example).min(0),
   iliDefinitions: z.array(ILIDefinition).min(0),
   synsetRelations: z.array(SynsetRelation).min(0),
-});
+}).strict();
 
 export const SyntacticBehavior = z.object({
   id: SyntacticBehaviorId,
   subcategorizationFrame: z.string(), // This is where huge variety lives
-});
+}).strict();
 
 export const Lexicon = z.object({
   id: Id, // "oewn"
@@ -169,7 +171,7 @@ export const Lexicon = z.object({
   lexicalEntries: z.array(LexicalEntry).min(0),
   synsets: z.array(Synset).min(0),
   syntacticBehaviors: z.array(SyntacticBehavior).min(0),
-});
+}).strict();
 
 export type Lemma = z.infer<typeof Lemma>;
 export type LexicalEntry = z.infer<typeof LexicalEntry>;
