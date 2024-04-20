@@ -21,7 +21,7 @@ import {
   SynsetRelationNode,
   SyntacticBehaviorNode,
 } from "~/parse_node_helpers.ts";
-import { Lexicon, partsOfSpeechList } from "~/xml_types.ts";
+import { partsOfSpeechList } from "./wordnet_types.ts";
 
 const version = "2023";
 const fileName = `english-wordnet-${version}.xml`;
@@ -129,30 +129,7 @@ function assertNodeParentType(node: Node, type: string) {
   );
 }
 
-Deno.test("Lexicon node parse", async () => {
-  const start = performance.now();
-  const parser = await testFileParser();
-  let lexicon: Lexicon | null = null;
-  for await (const node of parser) {
-    if (node.type == "Lexicon") {
-      console.log(node.children.length);
-      lexicon = LexiconNode(node);
-    }
-  }
-  assert(lexicon != undefined);
-  console.log(
-    `${((performance.now() - start) / 1000).toFixed(2)}s`,
-    lexicon.email,
-  );
-  assertEquals(lexicon.version, version);
-  // lexicon.lexicalEntries.forEach((e) => {
-  //   e.lemmas.forEach((l) => {
-  //     Deno.stdout.writeSync(new TextEncoder().encode(l.writtenForm + " "));
-  //   });
-  // });
-});
-
-Deno.test("valid xml data", async () => {
+Deno.test("validate wordnet xml", async () => {
   const start = performance.now();
   const parser = await testFileParser();
   const partsOfSpeech: Map<string, number> = new Map();
@@ -183,7 +160,9 @@ Deno.test("valid xml data", async () => {
       case "Lexicon": {
         lexicons++;
         assertNodeParentType(node, "LexicalResource");
-        // const _ = LexiconNode(node);
+        const lexicon = LexiconNode(node);
+        assert(lexicon != undefined);
+        assertEquals(lexicon.version, version);
         break;
       }
       case "LexicalEntry": {

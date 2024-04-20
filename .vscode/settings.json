@@ -114,6 +114,12 @@
     "postposition",
     "subcategorization",
     "synset",
-    "synsets"
+    "synsets",
+    "wordnet",
+    // repo names
+    "streamify",
+    "dbushell",
+    // British
+    "Behaviour"
   ]
 }

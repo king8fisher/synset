@@ -1,8 +1,8 @@
 import { z } from "zod";
 
-export const idSchema = z.string();
-export const synsetIdSchema = z.string();
-export const syntacticBehaviorIdSchema = z.string();
+export const Id = z.string();
+export const SynsetId = z.string();
+export const SyntacticBehaviorId = z.string();
 
 /**
 ```
@@ -17,7 +17,7 @@ x: Other (inc. particle, classifier, bound morphemes, determiners)
 u: Unknown
 ```
 */
-export const partsOfSpeechSchema = z.union([
+export const PartsOfSpeech = z.union([
   z.literal("n"),
   z.literal("v"),
   z.literal("a"),
@@ -29,7 +29,7 @@ export const partsOfSpeechSchema = z.union([
   z.literal("u"),
 ]);
 
-export const senseRelationRelType = z.union([
+export const SenseRelationRelType = z.union([
   z.literal("also"),
   z.literal("antonym"),
   z.literal("derivation"),
@@ -45,7 +45,7 @@ export const senseRelationRelType = z.union([
   z.literal("similar"),
 ]);
 
-export const synsetRelationRelType = z.union([
+export const SynsetRelationRelType = z.union([
   z.literal("hypernym"),
   z.literal("hyponym"),
   z.literal("instance_hypernym"),
@@ -81,88 +81,84 @@ export const synsetRelationRelType = z.union([
   z.literal("has_domain_region"),
 ]);
 
-export const partsOfSpeechList: string[] = partsOfSpeechSchema.options.map((
-  v,
-) => v.value);
-
-export const pronunciationSchema = z.object({
+export const Pronunciation = z.object({
   variety: z.string().optional(), // TODO: "GB", "US", ...
   inner: z.string(), // Actual value
 });
 
-export const lemmaSchema = z.object({
+export const Lemma = z.object({
   writtenForm: z.string(), // Actual value
-  partOfSpeech: partsOfSpeechSchema,
-  pronunciations: z.array(pronunciationSchema).min(0),
+  partOfSpeech: PartsOfSpeech,
+  pronunciations: z.array(Pronunciation).min(0),
 });
 
-export const senseRelationSchema = z.object({
-  relType: senseRelationRelType,
+export const SenseRelation = z.object({
+  relType: SenseRelationRelType,
   dcType: z.string().optional(), // TODO: This is only when relType is "other"
   target: z.string(), // TODO Where this leads to
 });
 
-export const adjPositionSchema = z.union([
+export const AdjPosition = z.union([
   z.literal("a"),
   z.literal("p"),
   z.literal("ip"),
 ]);
 
-export const senseSchema = z.object({
-  id: idSchema,
-  synset: synsetIdSchema,
-  subCat: syntacticBehaviorIdSchema.optional(),
-  adjPosition: adjPositionSchema.optional(),
-  senseRelations: z.array(senseRelationSchema).min(0),
+export const Sense = z.object({
+  id: Id,
+  synset: SynsetId,
+  subCat: SyntacticBehaviorId.optional(),
+  adjPosition: AdjPosition.optional(),
+  senseRelations: z.array(SenseRelation).min(0),
 });
 
-export const formSchema = z.object({
+export const Form = z.object({
   writtenForm: z.string(), // This is where huge variety lives
 });
 
-export const lexicalEntrySchema = z.object({
-  id: idSchema,
-  lemmas: z.array(lemmaSchema).length(1),
-  senses: z.array(senseSchema).min(1),
-  forms: z.array(formSchema).min(0),
+export const LexicalEntry = z.object({
+  id: Id,
+  lemmas: z.array(Lemma).length(1),
+  senses: z.array(Sense).min(1),
+  forms: z.array(Form).min(0),
 });
 
-export const definitionSchema = z.object({
+export const Definition = z.object({
   inner: z.string(), // Actual value
 });
 
-export const exampleSchema = z.object({
+export const Example = z.object({
   inner: z.string(), // Actual value
 });
 
-export const iliDefinitionSchema = z.object({
+export const ILIDefinition = z.object({
   inner: z.string(), // Actual value
 });
 
-export const synsetRelationSchema = z.object({
-  relType: synsetRelationRelType,
+export const SynsetRelation = z.object({
+  relType: SynsetRelationRelType,
   target: z.string(), // TODO Where this leads to?
 });
 
-export const synsetSchema = z.object({
-  id: idSchema,
+export const Synset = z.object({
+  id: Id,
   ili: z.string(),
   members: z.string(), // space-separated list
-  partOfSpeech: partsOfSpeechSchema,
+  partOfSpeech: PartsOfSpeech,
   lexfile: z.string(),
-  definitions: z.array(definitionSchema).min(1),
-  examples: z.array(exampleSchema).min(0),
-  iliDefinitions: z.array(iliDefinitionSchema).min(0),
-  synsetRelations: z.array(synsetRelationSchema).min(0),
+  definitions: z.array(Definition).min(1),
+  examples: z.array(Example).min(0),
+  iliDefinitions: z.array(ILIDefinition).min(0),
+  synsetRelations: z.array(SynsetRelation).min(0),
 });
 
-export const syntacticBehaviorSchema = z.object({
-  id: syntacticBehaviorIdSchema,
+export const SyntacticBehavior = z.object({
+  id: SyntacticBehaviorId,
   subcategorizationFrame: z.string(), // This is where huge variety lives
 });
 
-export const lexiconSchema = z.object({
-  id: idSchema, // "oewn"
+export const Lexicon = z.object({
+  id: Id, // "oewn"
   label: z.string(), // "Open English WordNet"
   language: z.string(), // "en"
   email: z.string(), // "english-wordnet@googlegroups.com"
@@ -170,21 +166,24 @@ export const lexiconSchema = z.object({
   version: z.string(), // "2023"
   citation: z.string(), // "John P. McCrae, Alexandre Rademaker, Francis Bond, Ewa Rudnicka and Christiane Fellbaum (2019) English WordNet 2019 – An Open-Source WordNet for English, *Proceedings of the 10th Global WordNet Conference* – GWC 2019"
   url: z.string(), // "https://github.com/globalwordnet/english-wordnet">
-  lexicalEntries: z.array(lexicalEntrySchema).min(0),
-  synsets: z.array(synsetSchema).min(0),
-  syntacticBehaviors: z.array(syntacticBehaviorSchema).min(0),
+  lexicalEntries: z.array(LexicalEntry).min(0),
+  synsets: z.array(Synset).min(0),
+  syntacticBehaviors: z.array(SyntacticBehavior).min(0),
 });
 
-export type Lemma = z.infer<typeof lemmaSchema>;
-export type LexicalEntry = z.infer<typeof lexicalEntrySchema>;
-export type Sense = z.infer<typeof senseSchema>;
-export type SenseRelation = z.infer<typeof senseRelationSchema>;
-export type Pronunciation = z.infer<typeof pronunciationSchema>;
-export type Form = z.infer<typeof formSchema>;
-export type Synset = z.infer<typeof synsetSchema>;
-export type Definition = z.infer<typeof definitionSchema>;
-export type Example = z.infer<typeof exampleSchema>;
-export type ILIDefinition = z.infer<typeof iliDefinitionSchema>;
-export type SynsetRelation = z.infer<typeof synsetRelationSchema>;
-export type SyntacticBehavior = z.infer<typeof syntacticBehaviorSchema>;
-export type Lexicon = z.infer<typeof lexiconSchema>;
+export type Lemma = z.infer<typeof Lemma>;
+export type LexicalEntry = z.infer<typeof LexicalEntry>;
+export type Sense = z.infer<typeof Sense>;
+export type SenseRelation = z.infer<typeof SenseRelation>;
+export type Pronunciation = z.infer<typeof Pronunciation>;
+export type Form = z.infer<typeof Form>;
+export type Synset = z.infer<typeof Synset>;
+export type Definition = z.infer<typeof Definition>;
+export type Example = z.infer<typeof Example>;
+export type ILIDefinition = z.infer<typeof ILIDefinition>;
+export type SynsetRelation = z.infer<typeof SynsetRelation>;
+export type SyntacticBehavior = z.infer<typeof SyntacticBehavior>;
+export type Lexicon = z.infer<typeof Lexicon>;
+
+export const partsOfSpeechList: string[] = PartsOfSpeech
+  .options.map((v) => v.value);
