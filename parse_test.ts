@@ -4,8 +4,7 @@ import {
   assertEquals,
   assertGreater,
 } from "$std/assert/mod.ts";
-import { existsSync } from "$std/fs/exists.ts";
-import { Node, parse } from "@dbushell/xml-streamify";
+import { Node } from "@dbushell/xml-streamify";
 import {
   DefinitionNode,
   ExampleNode,
@@ -21,53 +20,8 @@ import {
   SynsetRelationNode,
   SyntacticBehaviorNode,
 } from "~/parse_node_helpers.ts";
+import { testFileParser, version } from "./parse_wordnet.ts";
 import { partsOfSpeechList } from "./wordnet_types.ts";
-
-const version = "2023";
-const fileName = `english-wordnet-${version}.xml`;
-const localFileName = `./data/${fileName}`;
-
-const testFilePath = async () => {
-  const path = await Deno.realPath(localFileName);
-  return path;
-};
-
-const testFileExists = async () => {
-  if (existsSync(localFileName)) {
-    const path = await Deno.realPath(localFileName);
-    const stat = await Deno.stat(path);
-    return stat.isFile;
-  }
-  return false;
-};
-
-const fetchTestFile = async () => {
-  const src = await fetch(
-    `https://en-word.net/static/${fileName}.gz`,
-  );
-  const dest = await Deno.open(localFileName, {
-    create: true,
-    write: true,
-  });
-  if (src.body == null) return;
-  await src.body
-    .pipeThrough(new DecompressionStream("gzip"))
-    .pipeTo(dest.writable);
-};
-
-const testFileParser = async () => {
-  if (!await testFileExists()) {
-    console.log("unzipping");
-    await fetchTestFile();
-  }
-  const p = await testFilePath();
-
-  const parser = parse(`file:///${p.replace("\\", "/")}`, {
-    ignoreDeclaration: false,
-    silent: false,
-  });
-  return parser;
-};
 
 Deno.test("quotes", async () => {
   const parser = await testFileParser();
@@ -316,16 +270,3 @@ Deno.test("validate wordnet xml", async () => {
     `${((performance.now() - start) / 1000).toFixed(2)}s`,
   );
 });
-
-// deno-lint-ignore no-explicit-any
-export function measureExecutionTime<T extends (...args: unknown[]) => any>(
-  func: T,
-): (...args: Parameters<T>) => { result: ReturnType<T>; time: number } {
-  return (...args: Parameters<T>): { result: ReturnType<T>; time: number } => {
-    const start = performance.now();
-    const result = func(...args);
-    const end = performance.now();
-    const time = end - start;
-    return { result, time };
-  };
-}

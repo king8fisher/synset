@@ -1,7 +1,9 @@
 import { z } from "zod";
 
 export const Id = z.string();
+export const LexicalEntryId = z.string();
 export const SynsetId = z.string();
+export const SenseId = z.string();
 export const SyntacticBehaviorId = z.string();
 
 /**
@@ -95,7 +97,7 @@ export const Lemma = z.object({
 export const SenseRelation = z.object({
   relType: SenseRelationRelType,
   dcType: z.string().optional(), // TODO: This is only when relType is "other"
-  target: z.string(), // TODO Where this leads to
+  target: SenseId,
 }).strict();
 
 export const AdjPosition = z.union([
@@ -105,7 +107,7 @@ export const AdjPosition = z.union([
 ]);
 
 export const Sense = z.object({
-  id: Id,
+  id: SenseId,
   synset: SynsetId,
   subCat: SyntacticBehaviorId.optional(),
   adjPosition: AdjPosition.optional(),
@@ -117,7 +119,7 @@ export const Form = z.object({
 }).strict();
 
 export const LexicalEntry = z.object({
-  id: Id,
+  id: LexicalEntryId,
   lemmas: z.array(Lemma).length(1),
   senses: z.array(Sense).min(1),
   forms: z.array(Form).min(0),
@@ -138,13 +140,13 @@ export const ILIDefinition = z.object({
 
 export const SynsetRelation = z.object({
   relType: SynsetRelationRelType,
-  target: z.string(), // TODO Where this leads to?
+  target: SynsetId,
 }).strict();
 
 export const Synset = z.object({
-  id: Id,
+  id: SynsetId,
   ili: z.string(),
-  members: z.string(), // space-separated list
+  members: z.array(LexicalEntryId).min(1), // space-separated list of refs that we unwrap to array
   partOfSpeech: PartsOfSpeech,
   lexfile: z.string(),
   dcSource: z.string().optional(),
@@ -156,7 +158,7 @@ export const Synset = z.object({
 
 export const SyntacticBehavior = z.object({
   id: SyntacticBehaviorId,
-  subcategorizationFrame: z.string(), // This is where huge variety lives
+  subcategorizationFrame: z.string(), // Sentence structure. This is where (not very huge) variety lives
 }).strict();
 
 export const Lexicon = z.object({

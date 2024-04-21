@@ -130,7 +130,7 @@ export function SynsetNode(node: Node): Synset {
     id: attr(node, "id"),
     ili: attr(node, "ili"),
     lexfile: attr(node, "lexfile"),
-    members: attr(node, "members"),
+    members: attr(node, "members").split(" "),
     dcSource: attr(node, "dc:source"),
     partOfSpeech: PartsOfSpeech.parse(attr(node, "partOfSpeech")),
     definitions: children(node, "Definition", (v) => DefinitionNode(v)),

@@ -1,5 +1,6 @@
 {
   "tasks": {
+    "check": "deno fmt && deno fmt --check && deno lint && deno check **/*.ts && deno check **/*.tsx",
     "test": "deno test --allow-read=. --allow-write=. --allow-net"
   },
   "imports": {
@@ -7,6 +8,5 @@
     "$std/": "https://deno.land/std@0.221.0/",
     "@dbushell/xml-streamify": "jsr:@dbushell/xml-streamify@^0.4.0",
     "zod": "https://deno.land/x/zod@v3.22.4/mod.ts"
-  },
-  "exclude": ["./bun/**"]
+  }
 }
