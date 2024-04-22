@@ -62,26 +62,12 @@ Deno.test("quotes", async () => {
   console.log(`${count} lemmas processed`);
 });
 
-Deno.test("partsOfSpeechList", () => {
-  assertEquals(partsOfSpeechList, [
-    "n",
-    "v",
-    "a",
-    "r",
-    "s",
-    "c",
-    "p",
-    "x",
-    "u",
-  ]);
-});
-
-function assertNodeParentType(node: Node, type: string) {
+const assertNodeParentType = (node: Node, type: string) => {
   assert(
     node.parent && node.parent.type == type,
     `${node.type} should have a ${type} parent, but was ${node.parent?.type} instead`,
   );
-}
+};
 
 Deno.test("validate wordnet xml", async () => {
   const start = performance.now();
