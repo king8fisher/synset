@@ -1,36 +1,25 @@
 import { z } from "zod";
 
-export const Id = z.string();
+export const LexiconId = z.string();
 export const LexicalEntryId = z.string();
 export const SynsetId = z.string();
 export const SenseId = z.string();
 export const SyntacticBehaviorId = z.string();
 
-/**
-```
-n: Noun
-v: Verb
-a: Adjective
-r: Adverb
-s: Adjective Satellite
-c: Conjunction
-p: Adposition (Preposition, postposition, etc.)
-x: Other (inc. particle, classifier, bound morphemes, determiners)
-u: Unknown
-```
-*/
+/** Note: only the literals that are found in the test wordnet xml file are listed */
 export const PartsOfSpeech = z.union([
-  z.literal("n"),
-  z.literal("v"),
   z.literal("a"),
+  z.literal("c"),
+  z.literal("n"),
+  z.literal("p"),
   z.literal("r"),
   z.literal("s"),
-  z.literal("c"),
-  z.literal("p"),
-  z.literal("x"),
   z.literal("u"),
+  z.literal("v"),
+  z.literal("x"),
 ]);
 
+/** Note: only the literals that are found in the test wordnet xml file are listed */
 export const SenseRelationRelType = z.union([
   z.literal("also"),
   z.literal("antonym"),
@@ -47,40 +36,47 @@ export const SenseRelationRelType = z.union([
   z.literal("similar"),
 ]);
 
+/** Note: only the literals that are found in the test wordnet xml file are listed */
 export const SynsetRelationRelType = z.union([
+  z.literal("also"),
+  z.literal("attribute"),
+  z.literal("cause"),
+  z.literal("causes"),
+  z.literal("domain_member_region"),
+  z.literal("domain_member_topic"),
+  z.literal("domain_region"),
+  z.literal("domain_topic"),
+  z.literal("entail"),
+  z.literal("entails"),
+  z.literal("exemplifies"),
+  z.literal("has_domain_region"),
+  z.literal("has_domain_topic"),
+  z.literal("holo_member"),
+  z.literal("holo_part"),
+  z.literal("holo_substance"),
   z.literal("hypernym"),
   z.literal("hyponym"),
   z.literal("instance_hypernym"),
   z.literal("instance_hyponym"),
-  z.literal("part_holonym"),
-  z.literal("part_meronym"),
+  z.literal("is_caused_by"),
+  z.literal("is_entailed_by"),
+  z.literal("is_exemplified_by"),
   z.literal("member_holonym"),
   z.literal("member_meronym"),
+  z.literal("mero_member"),
+  z.literal("mero_part"),
+  z.literal("mero_substance"),
+  z.literal("part_holonym"),
+  z.literal("part_meronym"),
+  z.literal("similar"),
   z.literal("substance_holonym"),
   z.literal("substance_meronym"),
-  z.literal("entail"),
-  z.literal("cause"),
-  z.literal("similar"),
-  z.literal("also"),
-  z.literal("attribute"),
-  z.literal("domain_topic"),
-  z.literal("domain_member_topic"),
-  z.literal("domain_region"),
-  z.literal("domain_member_region"),
-  z.literal("exemplifies"),
-  z.literal("is_exemplified_by"),
-  z.literal("holo_part"),
-  z.literal("mero_part"),
-  z.literal("has_domain_topic"),
-  z.literal("mero_substance"),
-  z.literal("holo_member"),
-  z.literal("holo_substance"),
-  z.literal("mero_member"),
-  z.literal("is_entailed_by"),
-  z.literal("entails"),
-  z.literal("causes"),
-  z.literal("is_caused_by"),
-  z.literal("has_domain_region"),
+]);
+
+export const AdjPosition = z.union([
+  z.literal("a"),
+  z.literal("ip"),
+  z.literal("p"),
 ]);
 
 export const Pronunciation = z.object({
@@ -99,12 +95,6 @@ export const SenseRelation = z.object({
   dcType: z.string().optional(), // TODO: This is only when relType is "other"
   target: SenseId,
 }).strict();
-
-export const AdjPosition = z.union([
-  z.literal("a"),
-  z.literal("p"),
-  z.literal("ip"),
-]);
 
 export const Sense = z.object({
   id: SenseId,
@@ -162,14 +152,14 @@ export const SyntacticBehavior = z.object({
 }).strict();
 
 export const Lexicon = z.object({
-  id: Id, // "oewn"
+  id: LexiconId, // "oewn"
   label: z.string(), // "Open English WordNet"
   language: z.string(), // "en"
   email: z.string(), // "english-wordnet@googlegroups.com"
   license: z.string(), // "https://creativecommons.org/licenses/by/4.0/"
   version: z.string(), // "2023"
-  citation: z.string(), // "John P. McCrae, Alexandre Rademaker, Francis Bond, Ewa Rudnicka and Christiane Fellbaum (2019) English WordNet 2019 – An Open-Source WordNet for English, *Proceedings of the 10th Global WordNet Conference* – GWC 2019"
   url: z.string(), // "https://github.com/globalwordnet/english-wordnet">
+  citation: z.string(), // "John P. McCrae, Alexandre Rademaker, Francis Bond, Ewa Rudnicka and Christiane Fellbaum (2019) English WordNet 2019 – An Open-Source WordNet for English, *Proceedings of the 10th Global WordNet Conference* – GWC 2019"
   lexicalEntries: z.array(LexicalEntry).min(0),
   synsets: z.array(Synset).min(0),
   syntacticBehaviors: z.array(SyntacticBehavior).min(0),
