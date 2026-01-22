@@ -1,7 +1,14 @@
-import { existsSync, statSync, writeFileSync, mkdirSync, readdirSync, createReadStream } from "node:fs";
-import { Readable } from "node:stream";
+import {
+  createReadStream,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
 import path from "node:path";
-import { parse, Node } from "@dbushell/xml-streamify";
+import { Readable } from "node:stream";
+import { type Node, parse } from "@dbushell/xml-streamify";
 import { LexiconNode } from "./helpers";
 import type { Lexicon } from "./types";
 
@@ -71,7 +78,7 @@ function findCachedVersion(cacheDir: string): string | null {
  */
 export async function findLatestVersion(
   onProgress?: (message: string) => void,
-  cacheDir?: string
+  cacheDir?: string,
 ): Promise<string> {
   const log = onProgress || (() => {});
   const currentYear = new Date().getFullYear();
@@ -109,7 +116,6 @@ export async function findLatestVersion(
     for (let year = baseYear + 1; year <= lastReleasableYear; year++) {
       const version = year.toString();
       if (await urlExists(getDownloadUrl(version))) {
-        continue; // Keep checking for even newer
       } else {
         return (year - 1).toString();
       }
@@ -127,19 +133,26 @@ export async function findLatestVersion(
   }
 
   throw new Error(
-    `No WordNet version found between ${BASE_VERSION} and ${lastReleasableYear}`
+    `No WordNet version found between ${BASE_VERSION} and ${lastReleasableYear}`,
   );
 }
 
 /** Download and decompress WordNet XML from remote URL */
-async function downloadWordNet(version: string, destPath: string): Promise<void> {
+async function downloadWordNet(
+  version: string,
+  destPath: string,
+): Promise<void> {
   const url = getDownloadUrl(version);
   const response = await fetch(url);
   if (!response.ok || !response.body) {
-    throw new Error(`Failed to download WordNet ${version}: ${response.statusText}`);
+    throw new Error(
+      `Failed to download WordNet ${version}: ${response.statusText}`,
+    );
   }
 
-  const decompressed = response.body.pipeThrough(new DecompressionStream("gzip"));
+  const decompressed = response.body.pipeThrough(
+    new DecompressionStream("gzip"),
+  );
   const arrayBuffer = await new Response(decompressed).arrayBuffer();
 
   // Ensure directory exists
@@ -164,7 +177,8 @@ export function createParser(filePath: string) {
 
 /** Parse Lexicon from XML stream */
 export async function parseLexicon(
-  parser: AsyncGenerator<Node, void | Node, void>
+  // biome-ignore lint/suspicious/noConfusingVoidType: matches xml-streamify's return type
+  parser: AsyncGenerator<Node, void | Node, void>,
 ): Promise<Lexicon | undefined> {
   for await (const node of parser) {
     if (node.type === "Lexicon") {
@@ -216,12 +230,14 @@ export async function loadWordNet(filePath: string): Promise<Lexicon> {
  * @param options Loading options
  * @returns LoadResult with lexicon, version, and file path
  */
-export async function fetchWordNet(options: LoadOptions = {}): Promise<LoadResult> {
+export async function fetchWordNet(
+  options: LoadOptions = {},
+): Promise<LoadResult> {
   const cacheDir = options.cacheDir || getDefaultCacheDir();
   const log = options.onProgress || (() => {});
 
   // Determine version to use
-  const version = options.version || await findLatestVersion(log, cacheDir);
+  const version = options.version || (await findLatestVersion(log, cacheDir));
   const filename = getFilename(version);
   const cachedPath = path.join(cacheDir, filename);
 
@@ -244,13 +260,13 @@ export async function fetchWordNet(options: LoadOptions = {}): Promise<LoadResul
  * @returns Object with file path and version
  */
 export async function ensureWordNetCached(
-  options: LoadOptions = {}
+  options: LoadOptions = {},
 ): Promise<{ filePath: string; version: string }> {
   const cacheDir = options.cacheDir || getDefaultCacheDir();
   const log = options.onProgress || (() => {});
 
   // Determine version to use
-  const version = options.version || await findLatestVersion(log, cacheDir);
+  const version = options.version || (await findLatestVersion(log, cacheDir));
   const filename = getFilename(version);
   const cachedPath = path.join(cacheDir, filename);
 

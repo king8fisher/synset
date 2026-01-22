@@ -1,16 +1,16 @@
 #!/usr/bin/env node
-import { fetchWordNet, loadWordNet, ensureWordNetCached } from "./loader";
+import { decodeXmlEntities } from "./helpers";
+import { PartsOfSpeech, SynsetRelationRelType } from "./literals";
+import { ensureWordNetCached, fetchWordNet, loadWordNet } from "./loader";
 import {
   buildIndex,
+  findSynsets,
   getDefinitions,
-  getSynonyms,
   getHypernyms,
   getHyponyms,
-  findSynsets,
+  getSynonyms,
   getSynsetWords,
 } from "./query";
-import { PartsOfSpeech, SynsetRelationRelType } from "./literals";
-import { decodeXmlEntities } from "./helpers";
 
 /** Decode XML entities, return empty string if undefined */
 const decode = (s: string | undefined): string => decodeXmlEntities(s) ?? "";
@@ -54,9 +54,10 @@ async function main() {
   const filePath = fileIndex !== -1 ? args[fileIndex + 1] : undefined;
 
   // Remove --file and its argument from args for word extraction
-  const cleanArgs = fileIndex === -1
-    ? args
-    : args.filter((_, i) => i !== fileIndex && i !== fileIndex + 1);
+  const cleanArgs =
+    fileIndex === -1
+      ? args
+      : args.filter((_, i) => i !== fileIndex && i !== fileIndex + 1);
   const word = cleanArgs[1];
 
   if (command === "fetch") {
@@ -164,7 +165,7 @@ async function main() {
         for (const [relType, words] of relsByType) {
           const label = SynsetRelationRelType[relType] || relType;
           console.log(`  ${label}:`);
-          words.forEach((w) => console.log(`    - ${w}`));
+          for (const w of words) console.log(`    - ${w}`);
         }
       }
       break;
@@ -186,11 +187,12 @@ async function main() {
       console.log(`Part of Speech: ${pos}`);
       console.log(`ILI: ${synset.ili}`);
       console.log(`\nDefinitions:`);
-      synset.definitions.forEach((d) => console.log(`  - ${decode(d.inner)}`));
+      for (const d of synset.definitions) console.log(`  - ${decode(d.inner)}`);
 
       if (synset.examples.length > 0) {
         console.log(`\nExamples:`);
-        synset.examples.forEach((e) => console.log(`  - "${decode(e.inner)}"`));
+        for (const e of synset.examples)
+          console.log(`  - "${decode(e.inner)}"`);
       }
 
       if (synset.synsetRelations.length > 0) {

@@ -28,7 +28,11 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "test": "bun test",
-    "check": "tsc --noEmit",
+    "format": "biome format --write",
+    "lint": "biome lint",
+    "check": "biome check",
+    "typecheck": "tsc --noEmit",
+    "verify": "bun run typecheck && bun run check && bun run test",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
@@ -48,6 +52,7 @@
     "url": "https://github.com/king8fisher/synset"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.2.4",
     "@types/bun": "latest",
     "@types/node": "^20.19.30",
     "tsup": "^8.5.1",

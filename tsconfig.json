@@ -12,5 +12,5 @@
     },
     "types": ["bun-types"]
   },
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "docs"]
 }

@@ -1,19 +1,19 @@
-import { expect, test, describe, beforeAll, setDefaultTimeout } from "bun:test";
-import { readFileSync, readdirSync } from "node:fs";
+import { beforeAll, describe, expect, setDefaultTimeout, test } from "bun:test";
+import { readdirSync, readFileSync } from "node:fs";
 import { ensureWordNetCached } from "./loader";
 import {
   buildIndex,
-  getDefinitions,
-  getSynonyms,
-  getHypernyms,
-  getHyponyms,
-  findWord,
   findSenses,
   findSynsets,
-  getSynset,
-  getSense,
+  findWord,
+  getDefinitions,
+  getHypernyms,
+  getHyponyms,
   getLexicalEntry,
   getRelated,
+  getSense,
+  getSynonyms,
+  getSynset,
   getSynsetWords,
   type WordNetIndex,
 } from "./query";
@@ -43,14 +43,20 @@ beforeAll(async () => {
 describe("schema validation", () => {
   test("XML file has expected DOCTYPE declaration", () => {
     // Read first 500 bytes to check header
-    const header = readFileSync(dataPath, { encoding: "utf-8", flag: "r" }).slice(0, 500);
+    const header = readFileSync(dataPath, {
+      encoding: "utf-8",
+      flag: "r",
+    }).slice(0, 500);
 
-    expect(header).toContain('<!DOCTYPE LexicalResource SYSTEM');
+    expect(header).toContain("<!DOCTYPE LexicalResource SYSTEM");
     expect(header).toContain(EXPECTED_DTD);
   });
 
   test("downloaded data file is valid XML", () => {
-    const content = readFileSync(dataPath, { encoding: "utf-8", flag: "r" }).slice(0, 100);
+    const content = readFileSync(dataPath, {
+      encoding: "utf-8",
+      flag: "r",
+    }).slice(0, 100);
     expect(content).toContain("<?xml");
     console.log(`Using WordNet ${version} from ${dataPath}`);
   });
@@ -74,7 +80,9 @@ describe("schema validation", () => {
     expect(versions.length).toBeGreaterThan(0);
     const latestAvailable = versions[0].toString();
     expect(version).toBe(latestAvailable);
-    console.log(`Verified: using latest version ${version} (available: ${versions.join(", ")})`);
+    console.log(
+      `Verified: using latest version ${version} (available: ${versions.join(", ")})`,
+    );
   });
 });
 
@@ -187,7 +195,9 @@ describe("getHypernyms", () => {
     const hypernyms = getHypernyms(index, "dog");
     const allWords = hypernyms.flatMap((h) => getSynsetWords(index, h));
     const hasCanine = allWords.some(
-      (w) => w.toLowerCase().includes("canine") || w.toLowerCase().includes("domestic animal")
+      (w) =>
+        w.toLowerCase().includes("canine") ||
+        w.toLowerCase().includes("domestic animal"),
     );
     expect(hasCanine).toBe(true);
   });

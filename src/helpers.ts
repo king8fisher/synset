@@ -1,4 +1,4 @@
-import { Node } from "@dbushell/xml-streamify";
+import type { Node } from "@dbushell/xml-streamify";
 import {
   AdjPosition,
   Definition,
@@ -45,7 +45,7 @@ export function SenseRelationNode(node: Node): SenseRelation {
     dcType: optAttr(node, "dc:type"),
   };
   return SenseRelation.parse(
-    extendWithRestAttr(node, obj, (s) => (s == "dc:type" ? "dcType" : s))
+    extendWithRestAttr(node, obj, (s) => (s === "dc:type" ? "dcType" : s)),
   );
 }
 
@@ -59,11 +59,9 @@ export function SenseNode(node: Node): Sense {
     adjPosition: adjPos ? AdjPosition.parse(adjPos) : undefined,
   };
   return Sense.parse(
-    extendWithRestAttr(
-      node,
-      obj,
-      (s) => (s == "subcat" ? "subCat" : s == "adjposition" ? "adjPosition" : s)
-    )
+    extendWithRestAttr(node, obj, (s) =>
+      s === "subcat" ? "subCat" : s === "adjposition" ? "adjPosition" : s,
+    ),
   );
 }
 
@@ -97,7 +95,7 @@ export function ExampleNode(node: Node): Example {
     dcSource: optAttr(node, "dc:source"),
   };
   return Example.parse(
-    extendWithRestAttr(node, obj, (s) => (s == "dc:source" ? "dcSource" : s))
+    extendWithRestAttr(node, obj, (s) => (s === "dc:source" ? "dcSource" : s)),
   );
 }
 
@@ -138,7 +136,7 @@ export function SynsetNode(node: Node): Synset {
     synsetRelations: children(node, "SynsetRelation", SynsetRelationNode),
   };
   return Synset.parse(
-    extendWithRestAttr(node, obj, (s) => (s == "dc:source" ? "dcSource" : s))
+    extendWithRestAttr(node, obj, (s) => (s === "dc:source" ? "dcSource" : s)),
   );
 }
 
@@ -163,7 +161,9 @@ export function LexiconNode(node: Node): Lexicon {
   return Lexicon.parse(extendWithRestAttr(node, obj, (s) => s));
 }
 
-export const decodeXmlEntities = (s: string | undefined): string | undefined => {
+export const decodeXmlEntities = (
+  s: string | undefined,
+): string | undefined => {
   if (s === undefined) return undefined;
   return s
     .replace(/&amp;/g, "&")
@@ -176,7 +176,9 @@ export const decodeXmlEntities = (s: string | undefined): string | undefined => 
 const attr = (node: Node, attrName: string): string => {
   const value = decodeXmlEntities(node.attributes[attrName]);
   if (value === undefined) {
-    throw new Error(`Missing required attribute "${attrName}" on node "${node.type}"`);
+    throw new Error(
+      `Missing required attribute "${attrName}" on node "${node.type}"`,
+    );
   }
   return value;
 };
@@ -191,7 +193,7 @@ const optAttr = (node: Node, attrName: string): string | undefined => {
 const restAttrs = (
   node: Node,
   obj: object,
-  proxy: (from: string) => string
+  proxy: (from: string) => string,
 ): Record<string, string> => {
   const result: Record<string, string> = {};
   Object.keys(node.attributes) // These keys are still unmodified
@@ -205,7 +207,7 @@ const restAttrs = (
 const extendWithRestAttr = (
   node: Node,
   obj: object,
-  proxy: (from: string) => string
+  proxy: (from: string) => string,
 ) => {
   return Object.assign(obj, restAttrs(node, obj, proxy));
 };
@@ -213,7 +215,9 @@ const extendWithRestAttr = (
 const children = <T, Fn extends (node: Node) => T>(
   node: Node,
   type: string,
-  fn: Fn
+  fn: Fn,
 ) => {
-  return node.children.filter((v: Node) => v.type == type).map((v: Node) => fn(v));
+  return node.children
+    .filter((v: Node) => v.type === type)
+    .map((v: Node) => fn(v));
 };
