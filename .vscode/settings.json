@@ -66,30 +66,30 @@
     "editorInlayHint.background": "#6a6a8739",
     "editorCodeLens.foreground": "#6a6a87a0"
   },
-  "javascript.format.enable": true,
-  "typescript.format.enable": true,
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "javascript.format.enable": false,
+  "typescript.format.enable": false,
+  "editor.defaultFormatter": "biomejs.biome",
   "editor.formatOnSave": true,
   "[typescriptreact]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "biomejs.biome"
   },
   "[typescript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "biomejs.biome"
   },
   "[javascriptreact]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "biomejs.biome"
   },
   "[javascript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "biomejs.biome"
   },
   "[json]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "biomejs.biome"
   },
   "[jsonc]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "biomejs.biome"
   },
   "editor.codeActionsOnSave": {
-    "source.organizeImports": "never",
+    "source.organizeImports.biome": "explicit",
     "source.fixAll": "never"
   },
   "[css]": {

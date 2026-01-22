@@ -1,12 +1,12 @@
+import type { z } from "zod";
 import type {
-  Lexicon,
   LexicalEntry,
+  Lexicon,
   Sense,
   Synset,
   SynsetRelation,
+  SynsetRelationRelType as SynsetRelationRelTypeSchema,
 } from "./types";
-import { SynsetRelationRelType as SynsetRelationRelTypeSchema } from "./types";
-import { z } from "zod";
 
 export type SynsetRelationRelType = z.infer<typeof SynsetRelationRelTypeSchema>;
 
@@ -115,7 +115,7 @@ export function getSense(index: WordNetIndex, id: string): Sense | undefined {
 /** Get a lexical entry by ID */
 export function getLexicalEntry(
   index: WordNetIndex,
-  id: string
+  id: string,
 ): LexicalEntry | undefined {
   return index.entries.get(id);
 }
@@ -136,14 +136,17 @@ export function findSynsets(index: WordNetIndex, word: string): Synset[] {
 }
 
 /** Get all definitions for a word */
-export function getDefinitions(index: WordNetIndex, word: string): DefinitionResult[] {
+export function getDefinitions(
+  index: WordNetIndex,
+  word: string,
+): DefinitionResult[] {
   const synsets = findSynsets(index, word);
   return synsets.flatMap((synset) =>
     synset.definitions.map((d) => ({
       text: d.inner,
       synset,
       partOfSpeech: synset.partOfSpeech,
-    }))
+    })),
   );
 }
 
@@ -151,7 +154,7 @@ export function getDefinitions(index: WordNetIndex, word: string): DefinitionRes
 export function getRelated(
   index: WordNetIndex,
   synset: Synset,
-  relType: SynsetRelationRelType
+  relType: SynsetRelationRelType,
 ): Synset[] {
   return synset.synsetRelations
     .filter((r: SynsetRelation) => r.relType === relType)
@@ -172,7 +175,10 @@ export function getHyponyms(index: WordNetIndex, word: string): Synset[] {
 }
 
 /** Get synonyms for a word (words in the same synsets) */
-export function getSynonyms(index: WordNetIndex, word: string): SynonymResult[] {
+export function getSynonyms(
+  index: WordNetIndex,
+  word: string,
+): SynonymResult[] {
   const synsets = findSynsets(index, word);
   const lowerWord = word.toLowerCase();
   const seen = new Set<string>();

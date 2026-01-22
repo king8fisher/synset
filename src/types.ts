@@ -179,4 +179,6 @@ export type SynsetRelation = z.infer<typeof SynsetRelation>;
 export type SyntacticBehavior = z.infer<typeof SyntacticBehavior>;
 export type Lexicon = z.infer<typeof Lexicon>;
 
-export const partsOfSpeechList: string[] = PartsOfSpeech.options.map((v) => v.value);
+export const partsOfSpeechList: string[] = PartsOfSpeech.options.map(
+  (v) => v.value,
+);

@@ -1,95 +1,93 @@
 // Types and schemas
-export {
-  // Zod schemas for validation
-  Lexicon,
-  LexicalEntry,
-  Lemma,
-  Sense,
-  SenseRelation,
-  Synset,
-  SynsetRelation,
-  Definition,
-  Example,
-  Form,
-  Pronunciation,
-  ILIDefinition,
-  SyntacticBehavior,
-  // ID schemas
-  LexiconId,
-  LexicalEntryId,
-  SynsetId,
-  SenseId,
-  SyntacticBehaviorId,
-  // Enum schemas
-  PartsOfSpeech,
-  SenseRelationRelType,
-  SynsetRelationRelType,
-  AdjPosition,
-  // Utility
-  partsOfSpeechList,
-} from "./types";
 
-// Re-export types (inferred from Zod schemas)
-export type {
-  Lexicon as LexiconType,
-  LexicalEntry as LexicalEntryType,
-  Lemma as LemmaType,
-  Sense as SenseType,
-  SenseRelation as SenseRelationType,
-  Synset as SynsetType,
-  SynsetRelation as SynsetRelationObjectType,
-  Definition as DefinitionType,
-  Example as ExampleType,
-  Form as FormType,
-  Pronunciation as PronunciationType,
-  ILIDefinition as ILIDefinitionType,
-  SyntacticBehavior as SyntacticBehaviorType,
-} from "./types";
-
+// Low-level XML helpers (for advanced usage)
+export { decodeXmlEntities, LexiconNode } from "./helpers";
 // Literals (human-readable labels)
 export {
+  AdjPosition as AdjPositionLabels,
   PartsOfSpeech as PartsOfSpeechLabels,
   SenseRelationRelType as SenseRelationLabels,
   SynsetRelationRelType as SynsetRelationLabels,
-  AdjPosition as AdjPositionLabels,
 } from "./literals";
+export type { LoadOptions, LoadResult } from "./loader";
 
 // Data loading
 export {
-  loadWordNet,
-  fetchWordNet,
-  ensureWordNetCached,
-  findLatestVersion,
-  createParser,
-  parseLexicon,
-  getFilename,
-  getDownloadUrl,
-  getDefaultCacheDir,
   // Version constants
   BASE_VERSION,
-  WORDNET_VERSION, // legacy alias for BASE_VERSION
+  createParser,
+  ensureWordNetCached,
+  fetchWordNet,
+  findLatestVersion,
+  getDefaultCacheDir,
+  getDownloadUrl,
+  getFilename,
+  loadWordNet,
+  parseLexicon,
   WORDNET_FILENAME, // legacy
   WORDNET_URL, // legacy
+  WORDNET_VERSION, // legacy alias for BASE_VERSION
 } from "./loader";
-export type { LoadOptions, LoadResult } from "./loader";
+export type { DefinitionResult, SynonymResult, WordNetIndex } from "./query";
 
 // Query utilities
 export {
   buildIndex,
-  getSynset,
-  getSense,
-  getLexicalEntry,
-  findWord,
   findSenses,
   findSynsets,
+  findWord,
   getDefinitions,
-  getRelated,
   getHypernyms,
   getHyponyms,
+  getLexicalEntry,
+  getRelated,
+  getSense,
   getSynonyms,
+  getSynset,
   getSynsetWords,
 } from "./query";
-export type { WordNetIndex, DefinitionResult, SynonymResult } from "./query";
-
-// Low-level XML helpers (for advanced usage)
-export { decodeXmlEntities, LexiconNode } from "./helpers";
+// Re-export types (inferred from Zod schemas)
+export type {
+  Definition as DefinitionType,
+  Example as ExampleType,
+  Form as FormType,
+  ILIDefinition as ILIDefinitionType,
+  Lemma as LemmaType,
+  LexicalEntry as LexicalEntryType,
+  Lexicon as LexiconType,
+  Pronunciation as PronunciationType,
+  Sense as SenseType,
+  SenseRelation as SenseRelationType,
+  Synset as SynsetType,
+  SynsetRelation as SynsetRelationObjectType,
+  SyntacticBehavior as SyntacticBehaviorType,
+} from "./types";
+export {
+  AdjPosition,
+  Definition,
+  Example,
+  Form,
+  ILIDefinition,
+  Lemma,
+  LexicalEntry,
+  LexicalEntryId,
+  // Zod schemas for validation
+  Lexicon,
+  // ID schemas
+  LexiconId,
+  // Enum schemas
+  PartsOfSpeech,
+  Pronunciation,
+  // Utility
+  partsOfSpeechList,
+  Sense,
+  SenseId,
+  SenseRelation,
+  SenseRelationRelType,
+  Synset,
+  SynsetId,
+  SynsetRelation,
+  SynsetRelationRelType,
+  SyntacticBehavior,
+  SyntacticBehaviorId,
+} from "./types";
