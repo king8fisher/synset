@@ -1,2 +1,4 @@
 dict/
 data/*.xml
+
+node_modules/

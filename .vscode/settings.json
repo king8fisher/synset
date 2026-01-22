@@ -1,7 +1,7 @@
 {
-  "deno.enable": true,
-  "deno.lint": true,
-  "deno.cacheOnSave": true,
+  "deno.enable": false,
+  "deno.lint": false,
+  "deno.cacheOnSave": false,
   // "deno.enablePaths": ["./"],
   // "deno.internalInspect": true,
   "tailwindCSS.experimental.classRegex": [
@@ -9,7 +9,7 @@
   ],
 
   "editor.codeLens": false, // turn this on for debug test lense
-  "deno.codeLens.test": true,
+  "deno.codeLens.test": false,
 
   // "javascript.preferences.autoImportFileExcludePatterns": [],
   // "typescript.preferences.autoImportFileExcludePatterns": [],
@@ -66,27 +66,27 @@
     "editorInlayHint.background": "#6a6a8739",
     "editorCodeLens.foreground": "#6a6a87a0"
   },
-  "javascript.format.enable": false,
-  "typescript.format.enable": false,
-  "editor.defaultFormatter": "denoland.vscode-deno",
+  "javascript.format.enable": true,
+  "typescript.format.enable": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
   "[typescriptreact]": {
-    "editor.defaultFormatter": "denoland.vscode-deno"
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[typescript]": {
-    "editor.defaultFormatter": "denoland.vscode-deno"
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[javascriptreact]": {
-    "editor.defaultFormatter": "denoland.vscode-deno"
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[javascript]": {
-    "editor.defaultFormatter": "denoland.vscode-deno"
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[json]": {
-    "editor.defaultFormatter": "denoland.vscode-deno"
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[jsonc]": {
-    "editor.defaultFormatter": "denoland.vscode-deno"
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "editor.codeActionsOnSave": {
     "source.organizeImports": "never",
