@@ -1,6 +1,6 @@
-# synset
-
 [![npm version](https://img.shields.io/npm/v/synset.svg)](https://www.npmjs.com/package/synset)
+
+# synset
 
 WordNet dictionary parser with Zod validation, query utilities, and CLI.
 
