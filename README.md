@@ -2,17 +2,43 @@
 
 WordNet dictionary parser with Zod validation, query utilities, and CLI.
 
-## Install
+## Usage
+
+### CLI
+
+```bash
+# Run without installing
+bunx synset define dog
+
+# List synonyms
+bunx synset synonyms happy
+
+# Show hypernyms (more general terms)
+bunx synset hypernyms dog
+
+# Show all relations
+bunx synset related computer
+
+# Pre-download WordNet data
+bunx synset fetch
+
+# Use local file instead of cache
+bunx synset define dog --file ./path/to/english-wordnet-{YEAR}.xml
+```
+
+> Or install globally:
+> ```bash
+> bun install -g synset
+> synset define dog
+> ```
+
+### Library
 
 ```bash
 npm install synset
 # or
 bun add synset
 ```
-
-## Usage
-
-### Library
 
 ```ts
 import {
@@ -32,9 +58,6 @@ console.log(`Loaded WordNet ${version}`)
 // Or load from local file
 const lexicon = await loadWordNet('./path/to/english-wordnet-{YEAR}.xml')
 
-// Or request specific version
-const { lexicon } = await fetchWordNet({ version: '2024' })
-
 // Build index for fast lookups
 const index = buildIndex(lexicon)
 
@@ -52,45 +75,10 @@ findSynsets(index, 'bank')
 // [Synset for "financial institution", Synset for "river bank", ...]
 ```
 
-### CLI
-
-```bash
-# Show definitions
-synset define dog
-
-# List synonyms
-synset synonyms happy
-
-# Show hypernyms (more general terms)
-synset hypernyms dog
-
-# Show all relations
-synset related computer
-
-# Pre-download WordNet data
-synset fetch
-
-# Use local file instead of cache
-synset define dog --file ./path/to/english-wordnet-{YEAR}.xml
-```
-
-### Exports
-
-```ts
-// Zod schemas (runtime validation)
-import { Lexicon, Synset, Sense, LexicalEntry } from 'synset'
-
-// TypeScript types
-import type { LexiconType, SynsetType, SenseType } from 'synset'
-
-// Human-readable labels
-import { PartsOfSpeechLabels, SynsetRelationLabels } from 'synset'
-```
-
 ## Runtime
 
 - **Bun**: Full support (recommended)
-- **Node.js 18+**: Supported for remote fetching. Local file parsing requires Bun due to `file://` URL fetch limitations.
+- **Node.js 18+**: Full support
 
 ## Development
 
