@@ -1,4 +1,5 @@
-import { existsSync, statSync, writeFileSync, mkdirSync, readdirSync } from "node:fs";
+import { existsSync, statSync, writeFileSync, mkdirSync, readdirSync, createReadStream } from "node:fs";
+import { Readable } from "node:stream";
 import path from "node:path";
 import { parse, Node } from "@dbushell/xml-streamify";
 import { LexiconNode } from "./helpers";
@@ -153,12 +154,9 @@ async function downloadWordNet(version: string, destPath: string): Promise<void>
 /** Create XML streaming parser for WordNet file */
 export function createParser(filePath: string) {
   const resolvedPath = path.resolve(filePath);
-  // On Unix, paths start with /, so file:// + /path = file:///path
-  // On Windows, paths start with C:, so file:/// + C:/path = file:///C:/path
-  const fileUrl = resolvedPath.startsWith("/")
-    ? `file://${resolvedPath}`
-    : `file:///${resolvedPath.replace(/\\/g, "/")}`;
-  return parse(fileUrl, {
+  const nodeStream = createReadStream(resolvedPath);
+  const webStream = Readable.toWeb(nodeStream) as unknown as ReadableStream;
+  return parse(webStream, {
     ignoreDeclaration: false,
     silent: false,
   });
