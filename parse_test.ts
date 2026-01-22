@@ -1,11 +1,9 @@
-import { assert } from "$std/assert/assert.ts";
-import {
-  assertArrayIncludes,
-  assertEquals,
-  assertGreater,
-} from "$std/assert/mod.ts";
+import { expect, test, setDefaultTimeout } from "bun:test";
+
+setDefaultTimeout(60000);
 import { Node } from "@dbushell/xml-streamify";
 import {
+  decodeXmlEntities,
   DefinitionNode,
   ExampleNode,
   FormNode,
@@ -23,10 +21,17 @@ import {
 import { testFileParser, version } from "./parse_wordnet.ts";
 import { partsOfSpeechList } from "./wordnet_types.ts";
 
-Deno.test("quotes", async () => {
+const assertNodeParentType = (node: Node, type: string) => {
+  expect(
+    node.parent && node.parent.type == type,
+    `${node.type} should have a ${type} parent, but was ${node.parent?.type} instead`,
+  ).toBe(true);
+};
+
+test("quotes", async () => {
   const parser = await testFileParser();
 
-  const expect = [
+  const expectedItems = [
     { lemma: "tailor", count: 2 }, // "v" and "n"
     { lemma: "guard", count: 2 }, // "v" and "n"
     { lemma: "tailor's tack", count: 1 },
@@ -39,9 +44,9 @@ Deno.test("quotes", async () => {
 
   for await (const node of parser) {
     if (node.type == "Lemma") {
-      const writtenForm = node.attributes["writtenForm"];
+      const writtenForm = decodeXmlEntities(node.attributes["writtenForm"]);
 
-      expect.forEach((v) => {
+      expectedItems.forEach((v) => {
         if (writtenForm == v.lemma) {
           found.set(v.lemma, (found.get(v.lemma) || 0) + 1);
           console.log(node.raw);
@@ -51,25 +56,14 @@ Deno.test("quotes", async () => {
     }
   }
 
-  for (const e of expect) {
+  for (const e of expectedItems) {
     const f = found.get(e.lemma) || 0;
-    assertEquals(
-      f,
-      e.count,
-      `should be ${e.count} of "${e.lemma}" lemmas, found ${f} instead`,
-    );
+    expect(f).toBe(e.count);
   }
   console.log(`${count} lemmas processed`);
 });
 
-const assertNodeParentType = (node: Node, type: string) => {
-  assert(
-    node.parent && node.parent.type == type,
-    `${node.type} should have a ${type} parent, but was ${node.parent?.type} instead`,
-  );
-};
-
-Deno.test("validate wordnet xml", async () => {
+test("validate wordnet xml", async () => {
   const start = performance.now();
   const parser = await testFileParser();
   const partsOfSpeech: Map<string, number> = new Map();
@@ -83,40 +77,33 @@ Deno.test("validate wordnet xml", async () => {
     switch (node.type) {
       case "LexicalResource": {
         lexicalResource++;
-        assert(
+        expect(
           node.parent !== undefined,
           `LexicalResource parent should not undefined`,
-        );
-        assert(
-          node.parent.type === "@document",
+        ).toBe(true);
+        expect(
+          node.parent!.type === "@document",
           `LexicalResource parent should be @document`,
-        );
-        assert(
-          node.parent.parent === undefined,
+        ).toBe(true);
+        expect(
+          node.parent!.parent === undefined,
           `LexicalResource grandparent should be undefined`,
-        );
+        ).toBe(true);
         break;
       }
       case "Lexicon": {
         lexicons++;
         assertNodeParentType(node, "LexicalResource");
         const lexicon = LexiconNode(node);
-        assert(lexicon != undefined);
-        assertEquals(lexicon.version, version);
+        expect(lexicon).toBeDefined();
+        expect(lexicon.version).toBe(version);
         break;
       }
       case "LexicalEntry": {
         lexicalEntries++;
         assertNodeParentType(node, "Lexicon");
-        assertEquals(
-          Object.keys(node.attributes).length,
-          1,
-          "1 attribute is expected in every LexicalEntry",
-        );
-        assert(
-          "id" in node.attributes,
-          "id attribute should be in LexicalEntry",
-        );
+        expect(Object.keys(node.attributes).length).toBe(1);
+        expect("id" in node.attributes).toBe(true);
 
         const _ = LexicalEntryNode(node);
         break;
@@ -124,27 +111,13 @@ Deno.test("validate wordnet xml", async () => {
       case "Lemma": {
         lemmas++;
         assertNodeParentType(node, "LexicalEntry");
-        assertEquals(
-          Object.keys(node.attributes).length,
-          2,
-          "2 attributes are expected in every Lemma",
-        );
-        assert(
-          "writtenForm" in node.attributes,
-          "writtenForm should be in Lemma",
-        );
-        assert(
-          "partOfSpeech" in node.attributes,
-          "partOfSpeech should be in Lemma",
-        );
+        expect(Object.keys(node.attributes).length).toBe(2);
+        expect("writtenForm" in node.attributes).toBe(true);
+        expect("partOfSpeech" in node.attributes).toBe(true);
 
         const p = node.attributes.partOfSpeech;
 
-        assertArrayIncludes(
-          partsOfSpeechList,
-          [p],
-          `should be one of known parts of speech: ${partsOfSpeechList}`,
-        );
+        expect(partsOfSpeechList).toContain(p);
         let cnt = 0;
         if (partsOfSpeech.has(p)) {
           cnt = partsOfSpeech.get(p)!;
@@ -218,41 +191,15 @@ Deno.test("validate wordnet xml", async () => {
     }
   }
   console.log("partsOfSpeech", partsOfSpeech);
-  assert(
-    Array.from(partsOfSpeech.keys()).length <= partsOfSpeechList.length,
-    `discovered different parts of speech count should be within known parts of speech amounts`,
+  expect(Array.from(partsOfSpeech.keys()).length).toBeLessThanOrEqual(
+    partsOfSpeechList.length,
   );
 
-  assertEquals(
-    lexicalResource,
-    1,
-  );
-  assertGreater(
-    lexicons,
-    0,
-    "non-zero amount of Lexicon nodes",
-  );
-  assertGreater(
-    lexicalEntries,
-    0,
-    "non-zero amount of LexicalEntry nodes",
-  );
-  assertGreater(
-    lemmas,
-    0,
-    "non-zero amount of Lemma nodes",
-  );
-  assertGreater(
-    senses,
-    0,
-    "non-zero amount of Sense nodes",
-  );
-  assertGreater(
-    synsets,
-    0,
-    "non-zero amount of Synset nodes",
-  );
-  console.log(
-    `${((performance.now() - start) / 1000).toFixed(2)}s`,
-  );
+  expect(lexicalResource).toBe(1);
+  expect(lexicons).toBeGreaterThan(0);
+  expect(lexicalEntries).toBeGreaterThan(0);
+  expect(lemmas).toBeGreaterThan(0);
+  expect(senses).toBeGreaterThan(0);
+  expect(synsets).toBeGreaterThan(0);
+  console.log(`${((performance.now() - start) / 1000).toFixed(2)}s`);
 });

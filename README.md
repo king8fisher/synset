@@ -1,31 +1,22 @@
-## Overall Idea
+# Dictionary Data Processor
 
-Make a canvas for quickly browsing dictionary definitions, ability to stick
-found definitions (or portions of definitions) to the canvas with attributes
-like date, comments and links, leading to other pinned definitions. Create
-visual markers, highlight elements added long ago, make definitions fade away,
-potentially create challenges to make me guess the actual word. Create visual
-boundaries that group definitions together.
+## Setup
 
-### Subideas
-
-- count how many times the same word has already been on a canvas, jump to other
-  references.
-  - (you immediately know that you've already looked up this word in the past)
+```bash
+bun install
+bun test
+bun run check  # typecheck
+```
 
 ## Dictionary Module
-
-Dictionary sources need to be transformed into an easy to search and indexed
-format, potentially dumped to a Graph Database
-(https://neo4j.com/docs/javascript-manual/current/ or similar).
 
 - WordNet
   - Format:
     - https://globalwordnet.github.io/schemas/
       - XML file source:
         - https://github.com/globalwordnet/english-wordnet
-          - Current release: 2023. Downloaded by the test:
-            - `english-wordnet-2023.xml`
+          - Current release: 2024. Downloaded by the test:
+            - `english-wordnet-2024.xml`
         - XML format:
           [DTD](https://globalwordnet.github.io/schemas/WN-LMF-1.3.dtd)
           - Manually copied over to
@@ -33,27 +24,10 @@ format, potentially dumped to a Graph Database
 
 ### WordNet XML Source Structure
 
-`$ xmlstarlet el data/english-wordnet-2023.xml | sort | uniq -c | sort -n`
+(Originally created with `xmlstarlet` against the 2023 xml file).
 
-```
-     1 LexicalResource
-     1 LexicalResource/Lexicon
-    39 LexicalResource/Lexicon/SyntacticBehaviour
-  2700 LexicalResource/Lexicon/Synset/ILIDefinition
-  4474 LexicalResource/Lexicon/LexicalEntry/Form
- 44671 LexicalResource/Lexicon/LexicalEntry/Lemma/Pronunciation
- 49638 LexicalResource/Lexicon/Synset/Example
-120135 LexicalResource/Lexicon/Synset
-120141 LexicalResource/Lexicon/Synset/Definition
-122041 LexicalResource/Lexicon/LexicalEntry/Sense/SenseRelation
-161338 LexicalResource/Lexicon/LexicalEntry
-161338 LexicalResource/Lexicon/LexicalEntry/Lemma
-212071 LexicalResource/Lexicon/LexicalEntry/Sense
-293864 LexicalResource/Lexicon/Synset/SynsetRelation
-```
-
-`$ xmlstarlet el data/english-wordnet-2023.xml | sort | uniq | sort` `|`
-`(add unicode symbols)`
+`$ xmlstarlet el data/english-wordnet-2023.xml | sort | uniq | sort`
+(with unicode symbols added manually)
 
 ```
 📂 LexicalResource               root node
@@ -71,6 +45,31 @@ format, potentially dumped to a Graph Database
          📄 SynsetRelation
       📄 SyntacticBehaviour
 ```
+
+### Schema Verification
+
+Stats accumulated with:
+* `$ xmlstarlet el data/english-wordnet-2023.xml | sort | uniq -c | sort -n`
+* `$ grep -oE '<[A-Za-z]+' data/english-wordnet-2024.xml | sed 's/<//g' | sort | uniq -c | sort -n`
+
+Element counts comparison (schema unchanged between releases):
+
+| Element            |   2023 |   2024 |
+| ------------------ | -----: | -----: |
+| LexicalResource    |      1 |      1 |
+| Lexicon            |      1 |      1 |
+| SyntacticBehaviour |     39 |     39 |
+| ILIDefinition      |   2700 |   3216 |
+| Form               |   4474 |   4474 |
+| Pronunciation      |  44671 |  44669 |
+| Example            |  49638 |  49723 |
+| Synset             | 120135 | 120630 |
+| Definition         | 120141 | 120635 |
+| SenseRelation      | 122041 | 122018 |
+| LexicalEntry       | 161338 | 161705 |
+| Lemma              | 161338 | 161705 |
+| Sense              | 212071 | 212478 |
+| SynsetRelation     | 293864 | 297150 |
 
 ## Zod Test Coverage
 

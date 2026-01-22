@@ -1,45 +1,40 @@
-import { existsSync } from "$std/fs/exists.ts";
+import { existsSync, statSync } from "node:fs";
+import path from "node:path";
 import { Node, parse } from "@dbushell/xml-streamify";
 import { LexiconNode } from "~/parse_node_helpers.ts";
 
-export const version = "2023";
+export const version = "2024";
 export const fileName = `english-wordnet-${version}.xml`;
 export const localFileName = `./data/${fileName}`;
 
-const testFilePath = async () => {
-  const path = await Deno.realPath(localFileName);
-  return path;
+const testFilePath = () => {
+  return path.resolve(localFileName);
 };
 
-const testFileExists = async () => {
+const testFileExists = () => {
   if (existsSync(localFileName)) {
-    const path = await Deno.realPath(localFileName);
-    const stat = await Deno.stat(path);
-    return stat.isFile;
+    const p = path.resolve(localFileName);
+    const stat = statSync(p);
+    return stat.isFile();
   }
   return false;
 };
 
 const fetchTestFile = async () => {
-  const src = await fetch(
-    `https://en-word.net/static/${fileName}.gz`,
-  );
-  const dest = await Deno.open(localFileName, {
-    create: true,
-    write: true,
-  });
+  const src = await fetch(`https://en-word.net/static/${fileName}.gz`);
   if (src.body == null) return;
-  await src.body
-    .pipeThrough(new DecompressionStream("gzip"))
-    .pipeTo(dest.writable);
+  const decompressed = src.body.pipeThrough(new DecompressionStream("gzip"));
+  const response = new Response(decompressed);
+  const arrayBuffer = await response.arrayBuffer();
+  await Bun.write(localFileName, arrayBuffer);
 };
 
 export const testFileParser = async () => {
-  if (!await testFileExists()) {
+  if (!testFileExists()) {
     console.log("unzipping");
     await fetchTestFile();
   }
-  const p = await testFilePath();
+  const p = testFilePath();
 
   const parser = parse(`file:///${p.replace("\\", "/")}`, {
     ignoreDeclaration: false,

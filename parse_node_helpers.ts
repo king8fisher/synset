@@ -22,7 +22,7 @@ import {
 
 export function PronunciationNode(node: Node): Pronunciation {
   const obj: Pronunciation = {
-    variety: attr(node, "variety"),
+    variety: optAttr(node, "variety"),
     inner: node.innerText,
   };
   return Pronunciation.parse(extendWithRestAttr(node, obj, (s) => s));
@@ -42,7 +42,7 @@ export function SenseRelationNode(node: Node): SenseRelation {
   const obj: SenseRelation = {
     relType: SenseRelationRelType.parse(attr(node, "relType")),
     target: attr(node, "target"),
-    dcType: attr(node, "dc:type"),
+    dcType: optAttr(node, "dc:type"),
   };
   return SenseRelation.parse(
     extendWithRestAttr(node, obj, (s) => s == "dc:type" ? "dcType" : s),
@@ -50,14 +50,13 @@ export function SenseRelationNode(node: Node): SenseRelation {
 }
 
 export function SenseNode(node: Node): Sense {
+  const adjPos = optAttr(node, "adjposition");
   const obj: Sense = {
     id: attr(node, "id"),
     synset: SynsetId.parse(attr(node, "synset")),
     senseRelations: children(node, "SenseRelation", SenseRelationNode),
-    subCat: attr(node, "subcat"),
-    adjPosition: attr(node, "adjposition")
-      ? AdjPosition.parse(attr(node, "adjposition"))
-      : undefined,
+    subCat: optAttr(node, "subcat"),
+    adjPosition: adjPos ? AdjPosition.parse(adjPos) : undefined,
   };
   return Sense.parse(
     extendWithRestAttr(
@@ -95,7 +94,7 @@ export function DefinitionNode(node: Node): Definition {
 export function ExampleNode(node: Node): Example {
   const obj: Example = {
     inner: node.innerText,
-    dcSource: attr(node, "dc:source"),
+    dcSource: optAttr(node, "dc:source"),
   };
   return Example.parse(
     extendWithRestAttr(node, obj, (s) => s == "dc:source" ? "dcSource" : s),
@@ -131,7 +130,7 @@ export function SynsetNode(node: Node): Synset {
     ili: attr(node, "ili"),
     lexfile: attr(node, "lexfile"),
     members: attr(node, "members").split(" "),
-    dcSource: attr(node, "dc:source"),
+    dcSource: optAttr(node, "dc:source"),
     partOfSpeech: PartsOfSpeech.parse(attr(node, "partOfSpeech")),
     definitions: children(node, "Definition", (v) => DefinitionNode(v)),
     examples: children(node, "Example", (v) => ExampleNode(v)),
@@ -154,7 +153,7 @@ export function LexiconNode(node: Node): Lexicon {
     email: attr(node, "email"),
     license: attr(node, "license"),
     version: attr(node, "version"),
-    citation: attr(node, "citation"),
+    citation: optAttr(node, "citation"),
     url: attr(node, "url"),
     lexicalEntries: children(node, "LexicalEntry", LexicalEntryNode),
     synsets: children(node, "Synset", SynsetNode),
@@ -164,8 +163,26 @@ export function LexiconNode(node: Node): Lexicon {
   return Lexicon.parse(extendWithRestAttr(node, obj, (s) => s));
 }
 
-const attr = (node: Node, attrName: string) => {
-  return node.attributes[attrName];
+export const decodeXmlEntities = (s: string | undefined): string | undefined => {
+  if (s === undefined) return undefined;
+  return s
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&apos;/g, "'")
+    .replace(/&quot;/g, '"');
+};
+
+const attr = (node: Node, attrName: string): string => {
+  const value = decodeXmlEntities(node.attributes[attrName]);
+  if (value === undefined) {
+    throw new Error(`Missing required attribute "${attrName}" on node "${node.type}"`);
+  }
+  return value;
+};
+
+const optAttr = (node: Node, attrName: string): string | undefined => {
+  return decodeXmlEntities(node.attributes[attrName]);
 };
 
 /** restAttrs appends the rest of the attributes, taking into account that some has been renamed.
@@ -181,7 +198,7 @@ const restAttrs = (
     .filter((a) => !(proxy(a) in obj)) // Here we can't trust the 'in' because obj already has modified keys.
     .forEach(
       (k) => {
-        result[k] = node.attributes[k];
+        result[k] = decodeXmlEntities(node.attributes[k]) ?? node.attributes[k];
       },
     );
   return result;

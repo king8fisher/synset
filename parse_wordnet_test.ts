@@ -1,4 +1,6 @@
-import { assert } from "$std/assert/assert.ts";
+import { expect, test, setDefaultTimeout } from "bun:test";
+
+setDefaultTimeout(60000);
 import { parseLexicon, testFileParser } from "~/parse_wordnet.ts";
 import {
   Definition,
@@ -32,10 +34,10 @@ type RefsPack = {
   synsetRelationTargetRefs: RefRegistry;
 };
 
-Deno.test("wordnet node relationships", async () => {
+test("wordnet node relationships", async () => {
   const parser = await testFileParser();
   const lexicon = await parseLexicon(parser);
-  assert(lexicon != undefined);
+  expect(lexicon).toBeDefined();
 
   const synsetIds: IdRegistry = new Map();
   const senseIds: IdRegistry = new Map();
@@ -48,42 +50,40 @@ Deno.test("wordnet node relationships", async () => {
   const synsetMembersRefs: RefRegistry = new Map();
   const synsetRelationTargetRefs: RefRegistry = new Map();
 
-  lexicon.id;
-  lexicon.label;
-  lexicon.language;
-  lexicon.email;
-  lexicon.license;
-  lexicon.version;
-  lexicon.citation;
-  lexicon.url;
-  lexicon.lexicalEntries.forEach(
-    (le: LexicalEntry) => {
-      lexicalEntryIds.set(le.id);
-      le.lemmas.forEach((l: Lemma) => {
-        l.writtenForm; //
-        l.partOfSpeech; //
-        l.pronunciations.forEach((p: Pronunciation) => {
-          p.variety;
-          p.inner;
-        });
+  lexicon!.id;
+  lexicon!.label;
+  lexicon!.language;
+  lexicon!.email;
+  lexicon!.license;
+  lexicon!.version;
+  lexicon!.citation;
+  lexicon!.url;
+  lexicon!.lexicalEntries.forEach((le: LexicalEntry) => {
+    lexicalEntryIds.set(le.id);
+    le.lemmas.forEach((l: Lemma) => {
+      l.writtenForm; //
+      l.partOfSpeech; //
+      l.pronunciations.forEach((p: Pronunciation) => {
+        p.variety;
+        p.inner;
       });
-      le.senses.forEach((s: Sense) => {
-        senseIds.set(s.id);
-        senseSynsetRefs.set(s.synset);
-        if (s.subCat) senseSubCatRefs.set(s.subCat);
-        s.adjPosition; //
-        s.senseRelations.forEach((sr: SenseRelation) => {
-          sr.relType;
-          sr.dcType;
-          senseRelationTargetRefs.set(sr.target);
-        });
+    });
+    le.senses.forEach((s: Sense) => {
+      senseIds.set(s.id);
+      senseSynsetRefs.set(s.synset);
+      if (s.subCat) senseSubCatRefs.set(s.subCat);
+      s.adjPosition; //
+      s.senseRelations.forEach((sr: SenseRelation) => {
+        sr.relType;
+        sr.dcType;
+        senseRelationTargetRefs.set(sr.target);
       });
-      le.forms.forEach((f: Form) => {
-        f.writtenForm;
-      });
-    },
-  );
-  lexicon.synsets.forEach((s: Synset) => {
+    });
+    le.forms.forEach((f: Form) => {
+      f.writtenForm;
+    });
+  });
+  lexicon!.synsets.forEach((s: Synset) => {
     synsetIds.set(s.id);
     s.ili;
     s.members.forEach((m) => {
@@ -107,7 +107,7 @@ Deno.test("wordnet node relationships", async () => {
       synsetRelationTargetRefs.set(s.target);
     });
   });
-  lexicon.syntacticBehaviors.forEach((s) => syntacticBehaviorsIds.set(s.id));
+  lexicon!.syntacticBehaviors.forEach((s) => syntacticBehaviorsIds.set(s.id));
 
   assertAllowedRelationships(
     {
@@ -140,7 +140,7 @@ const assertAllowedRelationships = (
 ) => {
   const found = collectRelationships(idsPack, refsPack);
   found.forEach((_v, k) => {
-    assert(allowed.has(k), "Disallowed relation: " + k);
+    expect(allowed.has(k), "Disallowed relation: " + k).toBe(true);
   });
 };
 

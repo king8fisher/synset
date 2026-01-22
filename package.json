@@ -1,0 +1,16 @@
+{
+  "name": "dictexplorer",
+  "type": "module",
+  "scripts": {
+    "test": "bun test",
+    "check": "bun run tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@dbushell/xml-streamify": "0.7.0",
+    "zod": "^4.3.5"
+  }
+}

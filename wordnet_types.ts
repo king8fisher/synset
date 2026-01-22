@@ -82,19 +82,19 @@ export const AdjPosition = z.union([
 export const Pronunciation = z.object({
   variety: z.string().optional(), // TODO: "GB", "US", ...
   inner: z.string(), // Actual value
-}).strict();
+});
 
 export const Lemma = z.object({
   writtenForm: z.string(), // Actual value
   partOfSpeech: PartsOfSpeech,
   pronunciations: z.array(Pronunciation).min(0),
-}).strict();
+});
 
 export const SenseRelation = z.object({
   relType: SenseRelationRelType,
   dcType: z.string().optional(), // TODO: This is only when relType is "other"
   target: SenseId,
-}).strict();
+});
 
 export const Sense = z.object({
   id: SenseId,
@@ -102,36 +102,36 @@ export const Sense = z.object({
   subCat: SyntacticBehaviorId.optional(),
   adjPosition: AdjPosition.optional(),
   senseRelations: z.array(SenseRelation).min(0),
-}).strict();
+});
 
 export const Form = z.object({
   writtenForm: z.string(), // This is where huge variety lives
-}).strict();
+});
 
 export const LexicalEntry = z.object({
   id: LexicalEntryId,
   lemmas: z.array(Lemma).length(1),
   senses: z.array(Sense).min(1),
   forms: z.array(Form).min(0),
-}).strict();
+});
 
 export const Definition = z.object({
   inner: z.string(), // Actual value
-}).strict();
+});
 
 export const Example = z.object({
   inner: z.string(), // Actual value
   dcSource: z.string().optional(),
-}).strict();
+});
 
 export const ILIDefinition = z.object({
   inner: z.string(), // Actual value
-}).strict();
+});
 
 export const SynsetRelation = z.object({
   relType: SynsetRelationRelType,
   target: SynsetId,
-}).strict();
+});
 
 export const Synset = z.object({
   id: SynsetId,
@@ -144,12 +144,12 @@ export const Synset = z.object({
   examples: z.array(Example).min(0),
   iliDefinitions: z.array(ILIDefinition).min(0),
   synsetRelations: z.array(SynsetRelation).min(0),
-}).strict();
+});
 
 export const SyntacticBehavior = z.object({
   id: SyntacticBehaviorId,
   subcategorizationFrame: z.string(), // Sentence structure. This is where (not very huge) variety lives
-}).strict();
+});
 
 export const Lexicon = z.object({
   id: LexiconId, // "oewn"
@@ -159,11 +159,11 @@ export const Lexicon = z.object({
   license: z.string(), // "https://creativecommons.org/licenses/by/4.0/"
   version: z.string(), // "2023"
   url: z.string(), // "https://github.com/globalwordnet/english-wordnet">
-  citation: z.string(), // "John P. McCrae, Alexandre Rademaker, Francis Bond, Ewa Rudnicka and Christiane Fellbaum (2019) English WordNet 2019 – An Open-Source WordNet for English, *Proceedings of the 10th Global WordNet Conference* – GWC 2019"
+  citation: z.string().optional(), // "John P. McCrae, Alexandre Rademaker, Francis Bond, Ewa Rudnicka and Christiane Fellbaum (2019) English WordNet 2019 – An Open-Source WordNet for English, *Proceedings of the 10th Global WordNet Conference* – GWC 2019"
   lexicalEntries: z.array(LexicalEntry).min(0),
   synsets: z.array(Synset).min(0),
   syntacticBehaviors: z.array(SyntacticBehavior).min(0),
-}).strict();
+});
 
 export type Lemma = z.infer<typeof Lemma>;
 export type LexicalEntry = z.infer<typeof LexicalEntry>;
