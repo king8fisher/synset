@@ -1,11 +1,104 @@
-# Dictionary Data Processor
+# synset
 
-## Setup
+WordNet dictionary parser with Zod validation, query utilities, and CLI.
+
+## Install
+
+```bash
+npm install synset
+# or
+bun add synset
+```
+
+## Usage
+
+### Library
+
+```ts
+import {
+  fetchWordNet,
+  loadWordNet,
+  buildIndex,
+  getDefinitions,
+  getSynonyms,
+  getHypernyms,
+  findSynsets,
+} from 'synset'
+
+// Fetch WordNet data (auto-discovers latest version, downloads & caches ~100MB XML)
+const { lexicon, version } = await fetchWordNet()
+console.log(`Loaded WordNet ${version}`)
+
+// Or load from local file
+const lexicon = await loadWordNet('./path/to/english-wordnet-{YEAR}.xml')
+
+// Or request specific version
+const { lexicon } = await fetchWordNet({ version: '2024' })
+
+// Build index for fast lookups
+const index = buildIndex(lexicon)
+
+// Query
+getDefinitions(index, 'dog')
+// [{ text: "a member of the genus Canis...", synset, partOfSpeech: "n" }, ...]
+
+getSynonyms(index, 'happy')
+// [{ word: "glad", entry, synset }, ...]
+
+getHypernyms(index, 'dog')
+// [Synset for "canine", Synset for "domestic animal", ...]
+
+findSynsets(index, 'bank')
+// [Synset for "financial institution", Synset for "river bank", ...]
+```
+
+### CLI
+
+```bash
+# Show definitions
+synset define dog
+
+# List synonyms
+synset synonyms happy
+
+# Show hypernyms (more general terms)
+synset hypernyms dog
+
+# Show all relations
+synset related computer
+
+# Pre-download WordNet data
+synset fetch
+
+# Use local file instead of cache
+synset define dog --file ./path/to/english-wordnet-{YEAR}.xml
+```
+
+### Exports
+
+```ts
+// Zod schemas (runtime validation)
+import { Lexicon, Synset, Sense, LexicalEntry } from 'synset'
+
+// TypeScript types
+import type { LexiconType, SynsetType, SenseType } from 'synset'
+
+// Human-readable labels
+import { PartsOfSpeechLabels, SynsetRelationLabels } from 'synset'
+```
+
+## Runtime
+
+- **Bun**: Full support (recommended)
+- **Node.js 18+**: Supported for remote fetching. Local file parsing requires Bun due to `file://` URL fetch limitations.
+
+## Development
 
 ```bash
 bun install
 bun test
 bun run check  # typecheck
+bun run build  # build dist/
 ```
 
 ## Dictionary Module
@@ -15,8 +108,7 @@ bun run check  # typecheck
     - https://globalwordnet.github.io/schemas/
       - XML file source:
         - https://github.com/globalwordnet/english-wordnet
-          - Current release: 2024. Downloaded by the test:
-            - `english-wordnet-2024.xml`
+          - Latest version auto-discovered and downloaded by tests
         - XML format:
           [DTD](https://globalwordnet.github.io/schemas/WN-LMF-1.3.dtd)
           - Manually copied over to
@@ -89,3 +181,10 @@ Element counts comparison (schema unchanged between releases):
          📄 SynsetRelation          [x]
       📄 SyntacticBehaviour         [x]
 ```
+
+## TODO
+
+- [ ] Support [Open English Namenet](https://en-word.net/) - proper nouns (people, places, etc.) were moved to a separate resource starting with 2025 release
+- [ ] Option to fetch "2025+" edition which includes curated proper nouns from Namenet
+- [ ] CLI `--json` flag for JSON output
+- [ ] CLI colored output (disable with `--no-color`)

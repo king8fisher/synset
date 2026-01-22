@@ -1,16 +1,63 @@
 {
-  "name": "dictexplorer",
+  "name": "synset",
+  "version": "0.9.0",
+  "description": "WordNet dictionary parser with Zod validation, query utilities, and CLI",
   "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "bin": {
+    "synset": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
     "test": "bun test",
-    "check": "bun run tsc --noEmit"
+    "check": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "wordnet",
+    "dictionary",
+    "nlp",
+    "lexicon",
+    "thesaurus",
+    "synonyms",
+    "definitions",
+    "parser"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/king8fisher/synset"
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/node": "^20",
+    "tsup": "^8",
     "typescript": "^5"
   },
   "dependencies": {
     "@dbushell/xml-streamify": "0.7.0",
     "zod": "^4.3.5"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }
