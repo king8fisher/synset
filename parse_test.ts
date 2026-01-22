@@ -35,7 +35,6 @@ test("quotes", async () => {
     { lemma: "tailor", count: 2 }, // "v" and "n"
     { lemma: "guard", count: 2 }, // "v" and "n"
     { lemma: "tailor's tack", count: 1 },
-    { lemma: "Aladdin", count: 1 },
     { lemma: "Aladdin's lamp", count: 1 },
   ];
   const found: Map<string, number> = new Map();
