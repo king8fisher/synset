@@ -9,8 +9,8 @@ import type { LexicalEntry, Lexicon, Synset } from "./types";
 export const SCHEMA = `
 CREATE TABLE IF NOT EXISTS words (
   id INTEGER PRIMARY KEY,
-  word TEXT NOT NULL,
-  word_display TEXT NOT NULL
+  word TEXT NOT NULL,          -- lowercase for search
+  word_display TEXT NOT NULL   -- original casing
 );
 CREATE INDEX IF NOT EXISTS idx_words_word ON words(word);
 
