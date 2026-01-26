@@ -1,3 +1,4 @@
+import { existsSync, unlinkSync } from "node:fs";
 import Database from "libsql";
 import { decodeXmlEntities } from "./helpers";
 import type { LexicalEntry, Lexicon, Synset } from "./types";
@@ -60,6 +61,8 @@ export interface ExportProgress {
 
 export interface ExportOptions {
   onProgress?: (progress: ExportProgress) => void;
+  /** If true, delete existing file before export. If false (default), error if file exists. */
+  overwrite?: boolean;
 }
 
 /**
@@ -71,7 +74,18 @@ export function exportToSQLite(
   outputPath: string,
   options: ExportOptions = {},
 ): void {
-  const { onProgress } = options;
+  const { onProgress, overwrite } = options;
+
+  // Check if file exists
+  if (existsSync(outputPath)) {
+    if (overwrite) {
+      unlinkSync(outputPath);
+    } else {
+      throw new Error(
+        `File already exists: ${outputPath}. Use --overwrite to replace it.`,
+      );
+    }
+  }
 
   // Create database
   const db = new Database(outputPath);
