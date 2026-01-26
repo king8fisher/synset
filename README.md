@@ -85,7 +85,7 @@ findSynsets(index, 'bank')
 ```ts
 import { exportToSQLite } from 'synset'
 
-// Export to SQLite (requires Bun runtime)
+// Export to SQLite
 exportToSQLite(lexicon, 'dictionary.db', {
   onProgress: ({ phase, current, total }) => {
     console.log(`${phase}: ${current}/${total}`)
@@ -93,19 +93,14 @@ exportToSQLite(lexicon, 'dictionary.db', {
 })
 ```
 
-Schema:
-```
-words(id, word, word_display)
-synsets(id, pos, definition)
-word_synsets(word_id, synset_id)
-```
+Schema (`words`, `synsets`, `word_synsets` tables) is available as:
+- `import { SCHEMA } from 'synset'` - SQL string constant
+- `synset/schema.sql` - standalone file via package exports
 
 ## Runtime
 
-- **Bun**: Full support (recommended)
+- **Bun**: Full support
 - **Node.js 18+**: Full support
-
-> **Note:** SQLite export (`exportToSQLite`, `export-sqlite`) requires Bun (uses `bun:sqlite`).
 
 ## Development
 

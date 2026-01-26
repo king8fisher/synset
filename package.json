@@ -16,7 +16,8 @@
         "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
       }
-    }
+    },
+    "./schema.sql": "./dist/schema.sql"
   },
   "bin": {
     "synset": "./dist/cli.js"
