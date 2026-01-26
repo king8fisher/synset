@@ -1,5 +1,8 @@
 // Types and schemas
 
+export type { ExportOptions, ExportProgress } from "./export-sqlite";
+// SQLite export
+export { exportToSQLite, SCHEMA } from "./export-sqlite";
 // Low-level XML helpers (for advanced usage)
 export { decodeXmlEntities, LexiconNode } from "./helpers";
 // Literals (human-readable labels)

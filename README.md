@@ -24,6 +24,9 @@ bunx synset related computer
 # Pre-download WordNet data
 bunx synset fetch
 
+# Export to SQLite database
+bunx synset export-sqlite dictionary.db
+
 # Use local file instead of cache
 bunx synset define dog --file ./path/to/english-wordnet-{YEAR}.xml
 ```
@@ -77,10 +80,32 @@ findSynsets(index, 'bank')
 // [Synset for "financial institution", Synset for "river bank", ...]
 ```
 
+#### SQLite Export
+
+```ts
+import { exportToSQLite } from 'synset'
+
+// Export to SQLite (requires Bun runtime)
+exportToSQLite(lexicon, 'dictionary.db', {
+  onProgress: ({ phase, current, total }) => {
+    console.log(`${phase}: ${current}/${total}`)
+  }
+})
+```
+
+Schema:
+```
+words(id, word, word_display)
+synsets(id, pos, definition)
+word_synsets(word_id, synset_id)
+```
+
 ## Runtime
 
 - **Bun**: Full support (recommended)
 - **Node.js 18+**: Full support
+
+> **Note:** SQLite export (`exportToSQLite`, `export-sqlite`) requires Bun (uses `bun:sqlite`).
 
 ## Development
 

@@ -3,3 +3,5 @@ dict/
 data/*.xml
 
 node_modules/
+
+test-export.db
