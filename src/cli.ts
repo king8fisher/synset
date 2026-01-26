@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { exportToSQLite } from "./export-sqlite";
 import { decodeXmlEntities } from "./helpers";
 import { PartsOfSpeech, SynsetRelationRelType } from "./literals";
 import { ensureWordNetCached, fetchWordNet, loadWordNet } from "./loader";
@@ -29,6 +30,7 @@ Commands:
   related <word>      Show all relations for a word
   info <synset-id>    Show details for a synset ID
   fetch               Download WordNet data to cache
+  export-sqlite <out> Export dictionary to SQLite database
 
 Options:
   --file <path>       Use a local WordNet XML file instead of cache
@@ -39,6 +41,7 @@ Examples:
   synset synonyms happy
   synset related computer --file ./wordnet.xml
   synset fetch
+  synset export-sqlite dictionary.db
 `;
 
 async function main() {
@@ -67,6 +70,26 @@ async function main() {
       onProgress: console.log,
     });
     console.log(`WordNet ${version} cached at: ${cachedPath}`);
+    return;
+  }
+
+  if (command === "export-sqlite") {
+    const outputPath = cleanArgs[1];
+    if (!outputPath) {
+      console.error("Error: Missing output path for export-sqlite");
+      process.exit(1);
+    }
+    console.log("Loading WordNet data...");
+    const lexicon = filePath
+      ? await loadWordNet(filePath)
+      : (await fetchWordNet({ onProgress: console.log })).lexicon;
+    console.log(`Exporting to ${outputPath}...`);
+    exportToSQLite(lexicon, outputPath, {
+      onProgress: ({ phase, current, total }) => {
+        process.stdout.write(`\r${phase}: ${current}/${total}`);
+      },
+    });
+    console.log(`\nExported to ${outputPath}`);
     return;
   }
 
