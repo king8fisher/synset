@@ -1,6 +1,6 @@
 {
   "name": "synset",
-  "version": "0.9.6",
+  "version": "0.9.7",
   "description": "WordNet dictionary parser with Zod validation, query utilities, and CLI",
   "type": "module",
   "main": "./dist/index.cjs",

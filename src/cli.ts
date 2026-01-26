@@ -34,6 +34,7 @@ Commands:
 
 Options:
   --file <path>       Use a local WordNet XML file instead of cache
+  --overwrite         Overwrite existing file (for export-sqlite)
   --help, -h          Show this help message
 
 Examples:
@@ -79,12 +80,14 @@ async function main() {
       console.error("Error: Missing output path for export-sqlite");
       process.exit(1);
     }
+    const overwrite = args.includes("--overwrite");
     console.log("Loading WordNet data...");
     const lexicon = filePath
       ? await loadWordNet(filePath)
       : (await fetchWordNet({ onProgress: console.log })).lexicon;
     console.log(`Exporting to ${outputPath}...`);
     exportToSQLite(lexicon, outputPath, {
+      overwrite,
       onProgress: ({ phase, current, total }) => {
         process.stdout.write(`\r${phase}: ${current}/${total}`);
       },
