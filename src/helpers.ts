@@ -1,4 +1,5 @@
 import type { Node } from "@dbushell/xml-streamify";
+import { decodeXML } from "entities";
 import {
   AdjPosition,
   Definition,
@@ -161,17 +162,8 @@ export function LexiconNode(node: Node): Lexicon {
   return Lexicon.parse(extendWithRestAttr(node, obj, (s) => s));
 }
 
-export const decodeXmlEntities = (
-  s: string | undefined,
-): string | undefined => {
-  if (s === undefined) return undefined;
-  return s
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&apos;/g, "'")
-    .replace(/&quot;/g, '"');
-};
+export const decodeXmlEntities = (s: string | undefined): string | undefined =>
+  s === undefined ? undefined : decodeXML(s);
 
 const attr = (node: Node, attrName: string): string => {
   const value = decodeXmlEntities(node.attributes[attrName]);

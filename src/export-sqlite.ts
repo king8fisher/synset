@@ -35,10 +35,25 @@ CREATE TABLE IF NOT EXISTS synset_relations (
 );
 CREATE INDEX IF NOT EXISTS idx_sr_source ON synset_relations(source_id);
 CREATE INDEX IF NOT EXISTS idx_sr_target ON synset_relations(target_id);
+
+CREATE TABLE IF NOT EXISTS sense_relations (
+  source_word_id INTEGER NOT NULL,
+  source_synset_id TEXT NOT NULL,
+  target_word_id INTEGER NOT NULL,
+  target_synset_id TEXT NOT NULL,
+  rel_type TEXT NOT NULL,
+  PRIMARY KEY (source_word_id, source_synset_id, target_word_id, target_synset_id, rel_type)
+);
+CREATE INDEX IF NOT EXISTS idx_sense_rel_source ON sense_relations(source_word_id, source_synset_id);
 `;
 
 export interface ExportProgress {
-  phase: "words" | "synsets" | "word_synsets" | "synset_relations";
+  phase:
+    | "words"
+    | "synsets"
+    | "word_synsets"
+    | "synset_relations"
+    | "sense_relations";
   current: number;
   total: number;
 }
@@ -203,6 +218,78 @@ export function exportToSQLite(
             current: srCount,
             total: totalSynsetRelations,
           });
+        }
+      }
+    }
+  }
+  db.exec("COMMIT");
+
+  // Build sense_id -> (word_id, synset_id) mapping
+  const senseToWordSynset = new Map<
+    string,
+    { wordId: number; synsetId: string }
+  >();
+  for (const [word, entries] of wordToEntries) {
+    const wId = wordIds.get(word);
+    if (!wId) continue;
+    for (const entry of entries) {
+      for (const sense of entry.senses) {
+        senseToWordSynset.set(sense.id, {
+          wordId: wId,
+          synsetId: sense.synset,
+        });
+      }
+    }
+  }
+
+  // Insert sense relations
+  const insertSenseRelation = db.prepare(
+    "INSERT OR IGNORE INTO sense_relations (source_word_id, source_synset_id, target_word_id, target_synset_id, rel_type) VALUES (?, ?, ?, ?, ?)",
+  );
+
+  // Count and collect valid sense relations
+  let totalSenseRelations = 0;
+  for (const entries of wordToEntries.values()) {
+    for (const entry of entries) {
+      for (const sense of entry.senses) {
+        for (const rel of sense.senseRelations) {
+          if (senseToWordSynset.has(rel.target)) {
+            totalSenseRelations++;
+          }
+        }
+      }
+    }
+  }
+
+  db.exec("BEGIN TRANSACTION");
+  let senseRelCount = 0;
+  for (const [word, entries] of wordToEntries) {
+    const sourceWordId = wordIds.get(word);
+    if (!sourceWordId) continue;
+
+    for (const entry of entries) {
+      for (const sense of entry.senses) {
+        const sourceSynsetId = sense.synset;
+
+        for (const rel of sense.senseRelations) {
+          const target = senseToWordSynset.get(rel.target);
+          if (target) {
+            insertSenseRelation.run(
+              sourceWordId,
+              sourceSynsetId,
+              target.wordId,
+              target.synsetId,
+              rel.relType,
+            );
+            senseRelCount++;
+            if (onProgress && senseRelCount % 10000 === 0) {
+              onProgress({
+                phase: "sense_relations",
+                current: senseRelCount,
+                total: totalSenseRelations,
+              });
+            }
+          }
         }
       }
     }

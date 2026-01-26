@@ -1,6 +1,6 @@
 {
   "name": "synset",
-  "version": "0.9.5",
+  "version": "0.9.6",
   "description": "WordNet dictionary parser with Zod validation, query utilities, and CLI",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -61,6 +61,7 @@
   },
   "dependencies": {
     "@dbushell/xml-streamify": "0.7.0",
+    "entities": "^7.0.1",
     "libsql": "^0.5.0",
     "zod": "^4.3.5"
   },

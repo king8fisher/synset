@@ -1,16 +1,5 @@
 {
-  "deno.enable": false,
-  "deno.lint": false,
-  "deno.cacheOnSave": false,
-  // "deno.enablePaths": ["./"],
-  // "deno.internalInspect": true,
-  "tailwindCSS.experimental.classRegex": [
-    ["cl\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
-  ],
-
   "editor.codeLens": false, // turn this on for debug test lense
-  "deno.codeLens.test": false,
-
   // "javascript.preferences.autoImportFileExcludePatterns": [],
   // "typescript.preferences.autoImportFileExcludePatterns": [],
   // "javascript.preferences.importModuleSpecifier": "shortest",
@@ -39,7 +28,7 @@
   // "typescript.suggest.paths": true,
 
   "javascript.updateImportsOnFileMove.enabled": "prompt",
-  "typescript.updateImportsOnFileMove.enabled": "prompt",
+  "typescript.updateImportsOnFileMove.enabled": "always",
 
   "javascript.inlayHints.enumMemberValues.enabled": true,
   "typescript.inlayHints.enumMemberValues.enabled": true,
@@ -57,11 +46,9 @@
   "typescript.inlayHints.variableTypes.enabled": true,
   "javascript.inlayHints.variableTypes.suppressWhenTypeMatchesName": true,
   "typescript.inlayHints.variableTypes.suppressWhenTypeMatchesName": true,
-
   "editor.inlayHints.enabled": "offUnlessPressed",
   "editor.inlayHints.padding": false,
   "editor.inlayHints.fontSize": 11,
-
   "workbench.colorCustomizations": {
     "editorInlayHint.background": "#6a6a8739",
     "editorCodeLens.foreground": "#6a6a87a0"
@@ -117,6 +104,7 @@
     "synsets",
     "wordnet",
     // repo names
+    "libsql",
     "streamify",
     "dbushell",
     // British

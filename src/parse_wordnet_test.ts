@@ -1,8 +1,9 @@
-import { expect, test, setDefaultTimeout } from "bun:test";
+import { expect, setDefaultTimeout, test } from "bun:test";
 
 setDefaultTimeout(60000);
-import { parseLexicon, testFileParser } from "~/parse_wordnet.ts";
-import {
+
+import { parseLexicon, testFileParser } from "./parse_wordnet";
+import type {
   Definition,
   Example,
   Form,
@@ -14,7 +15,7 @@ import {
   SenseRelation,
   Synset,
   SynsetRelation,
-} from "~/wordnet_types.ts";
+} from "./types";
 
 type IdRegistry = Map<string, void>;
 type RefRegistry = Map<string, void>;
@@ -50,64 +51,66 @@ test("wordnet node relationships", async () => {
   const synsetMembersRefs: RefRegistry = new Map();
   const synsetRelationTargetRefs: RefRegistry = new Map();
 
-  lexicon!.id;
-  lexicon!.label;
-  lexicon!.language;
-  lexicon!.email;
-  lexicon!.license;
-  lexicon!.version;
-  lexicon!.citation;
-  lexicon!.url;
-  lexicon!.lexicalEntries.forEach((le: LexicalEntry) => {
+  expect(lexicon?.id).toBeString();
+  expect(lexicon?.label).toBeString();
+  expect(lexicon?.language).toBeString();
+  expect(lexicon?.email).toBeString();
+  expect(lexicon?.license).toBeString();
+  expect(lexicon?.version).toBeString();
+  expect(lexicon?.citation).toBeOneOf([expect.any(String), undefined]);
+  expect(lexicon?.url).toBeString();
+  lexicon?.lexicalEntries.forEach((le: LexicalEntry) => {
     lexicalEntryIds.set(le.id);
     le.lemmas.forEach((l: Lemma) => {
-      l.writtenForm; //
-      l.partOfSpeech; //
+      expect(l.writtenForm).toBeDefined();
+      expect(l.partOfSpeech).toBeDefined();
       l.pronunciations.forEach((p: Pronunciation) => {
-        p.variety;
-        p.inner;
+        // variety is optional
+        expect(p.inner).toBeDefined();
       });
     });
     le.senses.forEach((s: Sense) => {
       senseIds.set(s.id);
       senseSynsetRefs.set(s.synset);
       if (s.subCat) senseSubCatRefs.set(s.subCat);
-      s.adjPosition; //
+      // adjPosition is optional
       s.senseRelations.forEach((sr: SenseRelation) => {
-        sr.relType;
-        sr.dcType;
+        expect(sr.relType).toBeDefined();
+        // dcType is optional
         senseRelationTargetRefs.set(sr.target);
       });
     });
     le.forms.forEach((f: Form) => {
-      f.writtenForm;
+      expect(f.writtenForm).toBeDefined();
     });
   });
-  lexicon!.synsets.forEach((s: Synset) => {
+  lexicon?.synsets.forEach((s: Synset) => {
     synsetIds.set(s.id);
-    s.ili;
+    expect(s.ili).toBeDefined();
     s.members.forEach((m) => {
       synsetMembersRefs.set(m);
     });
-    s.partOfSpeech;
-    s.lexfile;
-    s.dcSource;
+    expect(s.partOfSpeech).toBeDefined();
+    expect(s.lexfile).toBeDefined();
+    // dcSource is optional
     s.definitions.forEach((d: Definition) => {
-      d.inner;
+      expect(d.inner).toBeDefined();
     });
     s.examples.forEach((e: Example) => {
-      e.inner;
-      e.dcSource;
+      expect(e.inner).toBeDefined();
+      // dcSource is optional
     });
     s.iliDefinitions.forEach((i: ILIDefinition) => {
-      i.inner;
+      expect(i.inner).toBeDefined();
     });
-    s.synsetRelations.forEach((s: SynsetRelation) => {
-      s.relType;
-      synsetRelationTargetRefs.set(s.target);
+    s.synsetRelations.forEach((sr: SynsetRelation) => {
+      expect(sr.relType).toBeDefined();
+      synsetRelationTargetRefs.set(sr.target);
     });
   });
-  lexicon!.syntacticBehaviors.forEach((s) => syntacticBehaviorsIds.set(s.id));
+  lexicon?.syntacticBehaviors.forEach((s) => {
+    syntacticBehaviorsIds.set(s.id);
+  });
 
   assertAllowedRelationships(
     {
@@ -140,7 +143,7 @@ const assertAllowedRelationships = (
 ) => {
   const found = collectRelationships(idsPack, refsPack);
   found.forEach((_v, k) => {
-    expect(allowed.has(k), "Disallowed relation: " + k).toBe(true);
+    expect(allowed.has(k), `Disallowed relation: ${k}`).toBe(true);
   });
 };
 
@@ -150,7 +153,7 @@ const collectRelationships = (idsPack: IdsPack, refsPack: RefsPack) => {
     Object.entries(idsPack).forEach(([idPackKey, idPackRegistry]) => {
       for (const ref of refPackRegistry.keys()) {
         if (idPackRegistry.has(ref)) {
-          result.set(refPackKey + " > " + idPackKey);
+          result.set(`${refPackKey} > ${idPackKey}`);
         }
       }
     });

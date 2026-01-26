@@ -29,3 +29,13 @@ CREATE TABLE IF NOT EXISTS synset_relations (
 );
 CREATE INDEX IF NOT EXISTS idx_sr_source ON synset_relations(source_id);
 CREATE INDEX IF NOT EXISTS idx_sr_target ON synset_relations(target_id);
+
+CREATE TABLE IF NOT EXISTS sense_relations (
+  source_word_id INTEGER NOT NULL,
+  source_synset_id TEXT NOT NULL,
+  target_word_id INTEGER NOT NULL,
+  target_synset_id TEXT NOT NULL,
+  rel_type TEXT NOT NULL,
+  PRIMARY KEY (source_word_id, source_synset_id, target_word_id, target_synset_id, rel_type)
+);
+CREATE INDEX IF NOT EXISTS idx_sense_rel_source ON sense_relations(source_word_id, source_synset_id);
