@@ -1,10 +1,8 @@
-import { expect, test, setDefaultTimeout } from "bun:test";
-
-setDefaultTimeout(60000);
-import { Node } from "@dbushell/xml-streamify";
+import { expect, setDefaultTimeout, test } from "bun:test";
+import type { Node } from "@dbushell/xml-streamify";
 import {
-  decodeXmlEntities,
   DefinitionNode,
+  decodeXmlEntities,
   ExampleNode,
   FormNode,
   ILIDefinitionNode,
@@ -17,13 +15,15 @@ import {
   SynsetNode,
   SynsetRelationNode,
   SyntacticBehaviorNode,
-} from "~/parse_node_helpers.ts";
-import { testFileParser, version } from "./parse_wordnet.ts";
-import { partsOfSpeechList } from "./wordnet_types.ts";
+} from "./helpers";
+import { testFileParser, version } from "./parse_wordnet";
+import { partsOfSpeechList } from "./types";
+
+setDefaultTimeout(60000);
 
 const assertNodeParentType = (node: Node, type: string) => {
   expect(
-    node.parent && node.parent.type == type,
+    node.parent && node.parent.type === type,
     `${node.type} should have a ${type} parent, but was ${node.parent?.type} instead`,
   ).toBe(true);
 };
@@ -42,11 +42,11 @@ test("quotes", async () => {
   let count = 0;
 
   for await (const node of parser) {
-    if (node.type == "Lemma") {
-      const writtenForm = decodeXmlEntities(node.attributes["writtenForm"]);
+    if (node.type === "Lemma") {
+      const writtenForm = decodeXmlEntities(node.attributes.writtenForm);
 
       expectedItems.forEach((v) => {
-        if (writtenForm == v.lemma) {
+        if (writtenForm === v.lemma) {
           found.set(v.lemma, (found.get(v.lemma) || 0) + 1);
           console.log(node.raw);
         }
@@ -81,11 +81,11 @@ test("validate wordnet xml", async () => {
           `LexicalResource parent should not undefined`,
         ).toBe(true);
         expect(
-          node.parent!.type === "@document",
+          node.parent?.type === "@document",
           `LexicalResource parent should be @document`,
         ).toBe(true);
         expect(
-          node.parent!.parent === undefined,
+          node.parent?.parent === undefined,
           `LexicalResource grandparent should be undefined`,
         ).toBe(true);
         break;
@@ -104,7 +104,7 @@ test("validate wordnet xml", async () => {
         expect(Object.keys(node.attributes).length).toBe(1);
         expect("id" in node.attributes).toBe(true);
 
-        const _ = LexicalEntryNode(node);
+        LexicalEntryNode(node);
         break;
       }
       case "Lemma": {
@@ -117,67 +117,62 @@ test("validate wordnet xml", async () => {
         const p = node.attributes.partOfSpeech;
 
         expect(partsOfSpeechList).toContain(p);
-        let cnt = 0;
-        if (partsOfSpeech.has(p)) {
-          cnt = partsOfSpeech.get(p)!;
-        } else {
-          cnt = 1;
-        }
+        const cnt = partsOfSpeech.get(p) ?? 0;
         partsOfSpeech.set(p, cnt + 1);
 
-        const _ = LemmaNode(node);
+        LemmaNode(node);
         break;
       }
       case "Sense": {
         senses++;
         assertNodeParentType(node, "LexicalEntry");
-        const _ = SenseNode(node);
+        SenseNode(node);
         break;
       }
       case "SenseRelation": {
         assertNodeParentType(node, "Sense");
-        const _ = SenseRelationNode(node);
+        SenseRelationNode(node);
         break;
       }
       case "Pronunciation": {
         assertNodeParentType(node, "Lemma");
-        const _ = PronunciationNode(node);
+        PronunciationNode(node);
         break;
       }
       case "Form": {
         assertNodeParentType(node, "LexicalEntry");
-        const _ = FormNode(node);
+        FormNode(node);
         break;
       }
       case "Synset": {
         synsets++;
         assertNodeParentType(node, "Lexicon");
-        const _ = SynsetNode(node);
+        SynsetNode(node);
         break;
       }
       case "Definition": {
         assertNodeParentType(node, "Synset");
-        const _ = DefinitionNode(node);
+        DefinitionNode(node);
         break;
       }
       case "Example": {
         assertNodeParentType(node, "Synset");
-        const _ = ExampleNode(node);
+        ExampleNode(node);
         break;
       }
       case "ILIDefinition": {
         assertNodeParentType(node, "Synset");
-        const _ = ILIDefinitionNode(node);
+        ILIDefinitionNode(node);
         break;
       }
       case "SynsetRelation": {
         assertNodeParentType(node, "Synset");
-        const _ = SynsetRelationNode(node);
+        SynsetRelationNode(node);
         break;
       }
       case "SyntacticBehaviour": {
         assertNodeParentType(node, "Lexicon");
-        const _ = SyntacticBehaviorNode(node);
+        SyntacticBehaviorNode(node);
         break;
       }
       case "declaration": {
@@ -185,7 +180,7 @@ test("validate wordnet xml", async () => {
         break;
       }
       default: {
-        throw new Error("Unknown node type: " + node.type);
+        throw new Error(`Unknown node type: ${node.type}`);
       }
     }
   }

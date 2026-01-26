@@ -88,7 +88,7 @@ import { exportToSQLite } from 'synset'
 // Export to SQLite
 exportToSQLite(lexicon, 'dictionary.db', {
   onProgress: ({ phase, current, total }) => {
-    // phases: words, synsets, word_synsets, synset_relations
+    // phases: words, synsets, word_synsets, synset_relations, sense_relations
     console.log(`${phase}: ${current}/${total}`)
   }
 })
@@ -103,9 +103,11 @@ Tables:
 - `synsets` - definitions with part of speech
 - `word_synsets` - word → synset mappings
 - `synset_relations` - hypernym, hyponym, meronym, etc. links between synsets
+- `sense_relations` - antonym, derivation, pertainym, etc. links between word senses
 
-Example query for word hypernyms:
+Example queries:
 ```sql
+-- Hypernyms via synset relations (dog → canine, domestic animal)
 SELECT w2.word_display, s2.definition
 FROM words w
 JOIN word_synsets ws ON w.id = ws.word_id
@@ -114,7 +116,14 @@ JOIN synsets s2 ON sr.target_id = s2.id
 JOIN word_synsets ws2 ON s2.id = ws2.synset_id
 JOIN words w2 ON ws2.word_id = w2.id
 WHERE w.word = 'dog' AND sr.rel_type = 'hypernym';
--- Returns: canine, domestic animal, ...
+
+-- Antonyms via sense relations (happy → unhappy)
+SELECT w2.word_display, s2.definition
+FROM words w
+JOIN sense_relations sr ON w.id = sr.source_word_id
+JOIN words w2 ON sr.target_word_id = w2.id
+JOIN synsets s2 ON sr.target_synset_id = s2.id
+WHERE w.word = 'happy' AND sr.rel_type = 'antonym';
 ```
 
 ## Runtime

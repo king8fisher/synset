@@ -134,6 +134,7 @@ describe("exportToSQLite", () => {
       expect(phases.has("synsets")).toBe(true);
       expect(phases.has("word_synsets")).toBe(true);
       expect(phases.has("synset_relations")).toBe(true);
+      expect(phases.has("sense_relations")).toBe(true);
 
       // Each event should have current and total
       for (const event of progressEvents) {
