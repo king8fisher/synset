@@ -24,9 +24,11 @@ CREATE TABLE IF NOT EXISTS synsets (
 CREATE TABLE IF NOT EXISTS word_synsets (
   word_id INTEGER NOT NULL,
   synset_id TEXT NOT NULL,
+  sense_order INTEGER NOT NULL DEFAULT 0,
   PRIMARY KEY (word_id, synset_id)
 );
 CREATE INDEX IF NOT EXISTS idx_ws_word ON word_synsets(word_id);
+CREATE INDEX IF NOT EXISTS idx_ws_order ON word_synsets(word_id, sense_order);
 
 CREATE TABLE IF NOT EXISTS synset_relations (
   source_id TEXT NOT NULL,
@@ -46,6 +48,14 @@ CREATE TABLE IF NOT EXISTS sense_relations (
   PRIMARY KEY (source_word_id, source_synset_id, target_word_id, target_synset_id, rel_type)
 );
 CREATE INDEX IF NOT EXISTS idx_sense_rel_source ON sense_relations(source_word_id, source_synset_id);
+
+CREATE TABLE IF NOT EXISTS synset_examples (
+  synset_id TEXT NOT NULL,
+  example TEXT NOT NULL,
+  example_order INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (synset_id, example_order)
+);
+CREATE INDEX IF NOT EXISTS idx_examples_synset ON synset_examples(synset_id);
 `;
 
 export interface ExportProgress {
@@ -53,6 +63,7 @@ export interface ExportProgress {
     | "words"
     | "synsets"
     | "word_synsets"
+    | "synset_examples"
     | "synset_relations"
     | "sense_relations";
   current: number;
@@ -166,9 +177,9 @@ export function exportToSQLite(
   }
   db.exec("COMMIT");
 
-  // Insert word-synset relations
+  // Insert word-synset relations with sense ordering
   const insertWordSynset = db.prepare(
-    "INSERT OR IGNORE INTO word_synsets (word_id, synset_id) VALUES (?, ?)",
+    "INSERT OR IGNORE INTO word_synsets (word_id, synset_id, sense_order) VALUES (?, ?, ?)",
   );
   let wsCount = 0;
   const totalWordSynsets = Array.from(wordToEntries.values()).reduce(
@@ -181,15 +192,55 @@ export function exportToSQLite(
     const wId = wordIds.get(word);
     if (!wId) continue;
 
+    // Track sense order per word (across all entries for this word)
+    let senseOrder = 0;
     for (const entry of entries) {
       for (const sense of entry.senses) {
-        insertWordSynset.run(wId, sense.synset);
+        insertWordSynset.run(wId, sense.synset, senseOrder);
+        senseOrder++;
         wsCount++;
         if (onProgress && wsCount % 10000 === 0) {
           onProgress({
             phase: "word_synsets",
             current: wsCount,
             total: totalWordSynsets,
+          });
+        }
+      }
+    }
+  }
+  db.exec("COMMIT");
+
+  // Insert synset examples
+  const insertExample = db.prepare(
+    "INSERT OR IGNORE INTO synset_examples (synset_id, example, example_order) VALUES (?, ?, ?)",
+  );
+
+  // Count total examples
+  let totalExamples = 0;
+  for (const synsetId of usedSynsetIds) {
+    const synset = synsetMap.get(synsetId);
+    if (synset?.examples) {
+      totalExamples += synset.examples.length;
+    }
+  }
+
+  db.exec("BEGIN TRANSACTION");
+  let exCount = 0;
+  for (const synsetId of usedSynsetIds) {
+    const synset = synsetMap.get(synsetId);
+    if (!synset?.examples) continue;
+
+    for (let i = 0; i < synset.examples.length; i++) {
+      const example = decodeXmlEntities(synset.examples[i].inner);
+      if (example) {
+        insertExample.run(synsetId, example, i);
+        exCount++;
+        if (onProgress && exCount % 10000 === 0) {
+          onProgress({
+            phase: "synset_examples",
+            current: exCount,
+            total: totalExamples,
           });
         }
       }
