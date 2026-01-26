@@ -88,14 +88,34 @@ import { exportToSQLite } from 'synset'
 // Export to SQLite
 exportToSQLite(lexicon, 'dictionary.db', {
   onProgress: ({ phase, current, total }) => {
+    // phases: words, synsets, word_synsets, synset_relations
     console.log(`${phase}: ${current}/${total}`)
   }
 })
 ```
 
-Schema (`words`, `synsets`, `word_synsets` tables) is available as:
+Schema is available as:
 - `import { SCHEMA } from 'synset'` - SQL string constant
 - `synset/schema.sql` - standalone file via package exports
+
+Tables:
+- `words` - unique words with display form
+- `synsets` - definitions with part of speech
+- `word_synsets` - word → synset mappings
+- `synset_relations` - hypernym, hyponym, meronym, etc. links between synsets
+
+Example query for word hypernyms:
+```sql
+SELECT w2.word_display, s2.definition
+FROM words w
+JOIN word_synsets ws ON w.id = ws.word_id
+JOIN synset_relations sr ON ws.synset_id = sr.source_id
+JOIN synsets s2 ON sr.target_id = s2.id
+JOIN word_synsets ws2 ON s2.id = ws2.synset_id
+JOIN words w2 ON ws2.word_id = w2.id
+WHERE w.word = 'dog' AND sr.rel_type = 'hypernym';
+-- Returns: canine, domestic animal, ...
+```
 
 ## Runtime
 

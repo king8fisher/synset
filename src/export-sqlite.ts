@@ -26,10 +26,19 @@ CREATE TABLE IF NOT EXISTS word_synsets (
   PRIMARY KEY (word_id, synset_id)
 );
 CREATE INDEX IF NOT EXISTS idx_ws_word ON word_synsets(word_id);
+
+CREATE TABLE IF NOT EXISTS synset_relations (
+  source_id TEXT NOT NULL,
+  target_id TEXT NOT NULL,
+  rel_type TEXT NOT NULL,
+  PRIMARY KEY (source_id, target_id, rel_type)
+);
+CREATE INDEX IF NOT EXISTS idx_sr_source ON synset_relations(source_id);
+CREATE INDEX IF NOT EXISTS idx_sr_target ON synset_relations(target_id);
 `;
 
 export interface ExportProgress {
-  phase: "words" | "synsets" | "relations";
+  phase: "words" | "synsets" | "word_synsets" | "synset_relations";
   current: number;
   total: number;
 }
@@ -129,29 +138,70 @@ export function exportToSQLite(
   db.exec("COMMIT");
 
   // Insert word-synset relations
-  const insertRelation = db.prepare(
+  const insertWordSynset = db.prepare(
     "INSERT OR IGNORE INTO word_synsets (word_id, synset_id) VALUES (?, ?)",
   );
-  let relationCount = 0;
-  const totalRelations = Array.from(wordToEntries.values()).reduce(
+  let wsCount = 0;
+  const totalWordSynsets = Array.from(wordToEntries.values()).reduce(
     (sum, entries) => sum + entries.reduce((s, e) => s + e.senses.length, 0),
     0,
   );
 
   db.exec("BEGIN TRANSACTION");
   for (const [word, entries] of wordToEntries) {
-    const wordId = wordIds.get(word);
-    if (!wordId) continue;
+    const wId = wordIds.get(word);
+    if (!wId) continue;
 
     for (const entry of entries) {
       for (const sense of entry.senses) {
-        insertRelation.run(wordId, sense.synset);
-        relationCount++;
-        if (onProgress && relationCount % 10000 === 0) {
+        insertWordSynset.run(wId, sense.synset);
+        wsCount++;
+        if (onProgress && wsCount % 10000 === 0) {
           onProgress({
-            phase: "relations",
-            current: relationCount,
-            total: totalRelations,
+            phase: "word_synsets",
+            current: wsCount,
+            total: totalWordSynsets,
+          });
+        }
+      }
+    }
+  }
+  db.exec("COMMIT");
+
+  // Insert synset relations (only for synsets we've exported)
+  const insertSynsetRelation = db.prepare(
+    "INSERT OR IGNORE INTO synset_relations (source_id, target_id, rel_type) VALUES (?, ?, ?)",
+  );
+
+  // Count total relations for progress
+  let totalSynsetRelations = 0;
+  for (const synsetId of usedSynsetIds) {
+    const synset = synsetMap.get(synsetId);
+    if (synset) {
+      for (const rel of synset.synsetRelations) {
+        if (usedSynsetIds.has(rel.target)) {
+          totalSynsetRelations++;
+        }
+      }
+    }
+  }
+
+  db.exec("BEGIN TRANSACTION");
+  let srCount = 0;
+  for (const synsetId of usedSynsetIds) {
+    const synset = synsetMap.get(synsetId);
+    if (!synset) continue;
+
+    for (const rel of synset.synsetRelations) {
+      // Only include relations to synsets we've exported
+      if (usedSynsetIds.has(rel.target)) {
+        insertSynsetRelation.run(synsetId, rel.target, rel.relType);
+        srCount++;
+        if (onProgress && srCount % 10000 === 0) {
+          onProgress({
+            phase: "synset_relations",
+            current: srCount,
+            total: totalSynsetRelations,
           });
         }
       }
