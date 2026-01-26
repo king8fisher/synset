@@ -1,4 +1,4 @@
-import { Database } from "bun:sqlite";
+import Database from "libsql";
 import { decodeXmlEntities } from "./helpers";
 import type { LexicalEntry, Lexicon, Synset } from "./types";
 
@@ -50,7 +50,7 @@ export function exportToSQLite(
   const { onProgress } = options;
 
   // Create database
-  const db = new Database(outputPath, { create: true });
+  const db = new Database(outputPath);
   db.exec("PRAGMA journal_mode = OFF");
   db.exec("PRAGMA synchronous = OFF");
   db.exec(SCHEMA);
