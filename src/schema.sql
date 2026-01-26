@@ -20,3 +20,12 @@ CREATE TABLE IF NOT EXISTS word_synsets (
   PRIMARY KEY (word_id, synset_id)
 );
 CREATE INDEX IF NOT EXISTS idx_ws_word ON word_synsets(word_id);
+
+CREATE TABLE IF NOT EXISTS synset_relations (
+  source_id TEXT NOT NULL,
+  target_id TEXT NOT NULL,
+  rel_type TEXT NOT NULL,
+  PRIMARY KEY (source_id, target_id, rel_type)
+);
+CREATE INDEX IF NOT EXISTS idx_sr_source ON synset_relations(source_id);
+CREATE INDEX IF NOT EXISTS idx_sr_target ON synset_relations(target_id);
