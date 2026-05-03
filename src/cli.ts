@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { exportToSQLite } from "./export-sqlite";
+import { type ExportTable, exportToSQLite } from "./export-sqlite";
 import { decodeXmlEntities } from "./helpers";
 import { PartsOfSpeech, SynsetRelationRelType } from "./literals";
 import { ensureWordNetCached, fetchWordNet, loadWordNet } from "./loader";
@@ -35,6 +35,12 @@ Commands:
 Options:
   --file <path>       Use a local WordNet XML file instead of cache
   --overwrite         Overwrite existing file (for export-sqlite)
+  --tables <csv>      Restrict export-sqlite to a comma-separated subset of
+                      tables (e.g. --tables=words,synsets). Each requested
+                      table's dependencies must also be in the list, or
+                      the command exits with an error. Omit for full export.
+                      Valid: words, synsets, word_synsets, synset_relations,
+                      sense_relations, synset_examples, word_regions.
   --help, -h          Show this help message
 
 Examples:
@@ -43,6 +49,7 @@ Examples:
   synset related computer --file ./wordnet.xml
   synset fetch
   synset export-sqlite dictionary.db
+  synset export-sqlite dictionary.db --tables=words,synsets
 `;
 
 async function main() {
@@ -54,15 +61,44 @@ async function main() {
   }
 
   const command = args[0];
-  const fileIndex = args.indexOf("--file");
-  const filePath = fileIndex !== -1 ? args[fileIndex + 1] : undefined;
 
-  // Remove --file and its argument from args for word extraction
-  const cleanArgs =
-    fileIndex === -1
-      ? args
-      : args.filter((_, i) => i !== fileIndex && i !== fileIndex + 1);
+  // Strip option flags and their values from positional args. Tracks --file
+  // and --tables (both `--flag value` and `--flag=value` forms).
+  let filePath: string | undefined;
+  let tablesArg: string | undefined;
+  const positional: string[] = [];
+  for (let i = 0; i < args.length; i++) {
+    const a = args[i];
+    if (a === "--file") {
+      filePath = args[++i];
+      continue;
+    }
+    if (a.startsWith("--file=")) {
+      filePath = a.slice("--file=".length);
+      continue;
+    }
+    if (a === "--tables") {
+      tablesArg = args[++i];
+      continue;
+    }
+    if (a.startsWith("--tables=")) {
+      tablesArg = a.slice("--tables=".length);
+      continue;
+    }
+    if (a === "--overwrite" || a === "--force") continue;
+    if (a === "--help" || a === "-h") continue;
+    positional.push(a);
+  }
+  const cleanArgs = positional;
   const word = cleanArgs[1];
+
+  const tables: ExportTable[] | undefined =
+    tablesArg !== undefined
+      ? (tablesArg
+          .split(",")
+          .map((s) => s.trim())
+          .filter((s) => s.length > 0) as ExportTable[])
+      : undefined;
 
   if (command === "fetch") {
     console.log("Downloading WordNet data...");
@@ -88,6 +124,7 @@ async function main() {
     console.log(`Exporting to ${outputPath}...`);
     exportToSQLite(lexicon, outputPath, {
       overwrite,
+      tables,
       onProgress: ({ phase, current, total }) => {
         process.stdout.write(`\r${phase}: ${current}/${total}`);
       },

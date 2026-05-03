@@ -49,3 +49,10 @@ CREATE TABLE IF NOT EXISTS synset_examples (
   PRIMARY KEY (synset_id, example_order)
 );
 CREATE INDEX IF NOT EXISTS idx_examples_synset ON synset_examples(synset_id);
+
+CREATE TABLE IF NOT EXISTS word_regions (
+  word_id INTEGER NOT NULL,
+  region  TEXT NOT NULL,
+  PRIMARY KEY (word_id, region)
+);
+CREATE INDEX IF NOT EXISTS idx_word_regions_region ON word_regions(region);

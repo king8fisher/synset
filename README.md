@@ -27,6 +27,9 @@ bunx synset fetch
 # Export to SQLite database
 bunx synset export-sqlite dictionary.db
 
+# Export only a subset of tables
+bunx synset export-sqlite dictionary.db --tables=words,synsets
+
 # Use local file instead of cache
 bunx synset define dog --file ./path/to/english-wordnet-{YEAR}.xml
 ```
@@ -88,7 +91,7 @@ import { exportToSQLite } from 'synset'
 // Export to SQLite
 exportToSQLite(lexicon, 'dictionary.db', {
   onProgress: ({ phase, current, total }) => {
-    // phases: words, synsets, word_synsets, synset_relations, sense_relations
+    // phases: words, synsets, word_synsets, synset_relations, sense_relations, synset_examples, word_regions
     console.log(`${phase}: ${current}/${total}`)
   }
 })
@@ -104,6 +107,15 @@ Tables:
 - `word_synsets` - word → synset mappings
 - `synset_relations` - hypernym, hyponym, meronym, etc. links between synsets
 - `sense_relations` - antonym, derivation, pertainym, etc. links between word senses
+- `synset_examples` - example sentences for synsets
+- `word_regions` - per-word region tags ('us' | 'gb' | 'au' | 'ca' | 'scotland'), derived from the WordNet "exemplifies" relation
+
+The CLI accepts `--tables=<csv>` to export a subset (e.g.
+`--tables=words,synsets`). Each requested table's dependencies must also be
+listed: `synsets` requires `words`; `word_synsets`, `sense_relations`, and
+`synset_examples` require their parents; `word_regions` requires both
+`words` and `sense_relations`. The command exits with an error naming any
+missing dependency or unknown table; omit `--tables` for a full export.
 
 Example queries:
 ```sql
@@ -124,6 +136,13 @@ JOIN sense_relations sr ON w.id = sr.source_word_id
 JOIN words w2 ON sr.target_word_id = w2.id
 JOIN synsets s2 ON sr.target_synset_id = s2.id
 WHERE w.word = 'happy' AND sr.rel_type = 'antonym';
+
+-- All British-English variants
+SELECT w.word_display
+FROM words w
+JOIN word_regions wr ON w.id = wr.word_id
+WHERE wr.region = 'gb'
+ORDER BY w.word;
 ```
 
 ## Runtime
