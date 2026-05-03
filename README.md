@@ -159,6 +159,36 @@ bun run check  # typecheck
 bun run build  # build dist/
 ```
 
+## Releasing
+
+Releases are manual. The repo encodes the version in commit subjects (e.g.
+`v0.9.8; …`) rather than relying on git tags, and publishes to npm from a
+local checkout.
+
+1. Land the change on `main` and confirm the
+   [Bun workflow](.github/workflows/bun.yml) is green — it runs `bun run
+   verify` (typecheck + Biome + tests) on every push.
+2. Bump `version` in `package.json` (patch for additive/fix, minor for
+   feature batches; the project is still 0.x).
+3. Commit with a `vX.Y.Z; <summary>` subject, lowercase after the prefix:
+   ```bash
+   git commit -am "v0.9.9; add word_regions, --tables export flag"
+   ```
+4. (Optional) Tag the commit and push:
+   ```bash
+   git tag v0.9.9
+   git push origin main --tags
+   ```
+5. Publish to npm. `prepublishOnly` runs `npm run build` (`tsup`) so the
+   `dist/` listed in `package.json#files` is fresh:
+   ```bash
+   npm publish
+   ```
+6. (Optional) Cut a GitHub release:
+   ```bash
+   gh release create v0.9.9 --generate-notes
+   ```
+
 ## Dictionary Module
 
 - WordNet
