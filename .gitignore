@@ -5,3 +5,7 @@ data/*.xml
 node_modules/
 
 *.db
+
+docs/internal
+docs/impl
+docs/prd
