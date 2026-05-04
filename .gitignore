@@ -9,3 +9,6 @@ node_modules/
 docs/internal
 docs/impl
 docs/prd
+
+AGENTS.md
+CLAUDE.md
